@@ -1,0 +1,13 @@
+.DS_Store
+build
+Desktop.ini
+node_modules
+.sass-cache
+*.sass-cache*
+style.scss~
+.idea/*
+*.icloud
+*.png
+__pycache__/*
+*.pyc
+libraries/*

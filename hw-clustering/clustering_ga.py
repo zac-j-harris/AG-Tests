@@ -62,7 +62,7 @@ def crossover(population, fitness, elites, fit_cutoff):
 
 def get_elites(fitness, elitism, selection_rate):
 	# print("Gathering elites")
-	elites = [-1 for _ in range(max(int(len(fitness) * elitism)), 1)]
+	elites = [-1 for _ in range( max(int(len(fitness) * elitism), 1))]
 	fit_cutoff = max(fitness)+1
 	kept_count = 0
 	count = 0
@@ -104,7 +104,7 @@ def mutate(population, elites, mutation_rate, mutation_perc, struct_mut, m_fit, 
 	return new_pop
 
 
-def run_ga(fname, f_out, population_size=5, elitism=0.1, mutation_rate=1.0, mutation_perc=0.50, struct_mut=0.3, selection_rate=0.8, subsample=0.10, min_generations=50):
+def run_ga(fname, f_out, population_size=10, elitism=0.1, mutation_rate=1.0, mutation_perc=0.50, struct_mut=0.3, selection_rate=0.8, subsample=0.10, min_generations=50):
 
 	arr, dim = get_data(fname, subsample=subsample)
 	clustroid_num = [1 for _ in range(population_size)]
@@ -147,6 +147,7 @@ def run_ga(fname, f_out, population_size=5, elitism=0.1, mutation_rate=1.0, muta
 def main():
 	# quit()
 	home_dir = '/home/zharris1/Documents/Github/Arcc-git-tests/hw-clustering/'
+	# home_dir = './'
 	fnames = ['Harris_array_1M.csv', 'Harris_array_50K.csv']
 	f_outs = ['Harris_1M_out.pkl', 'Harris_50K_out.pkl']
 	

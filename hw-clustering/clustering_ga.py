@@ -146,11 +146,12 @@ def run_ga(fname, f_out, population_size=30, elitism=0.1, mutation_rate=0.3, mut
 
 def main():
 	# quit()
-	fnames = ['./Harris_array_1M.csv', './Harris_array_50K.csv']
-	f_outs = ['./Harris_1M_out.pkl', './Harris_50K_out.pkl']
+	home_dir = '/home/zharris1/Documents/Github/Arcc-git-tests/hw-clustering/'
+	fnames = ['Harris_array_1M.csv', 'Harris_array_50K.csv']
+	f_outs = ['Harris_1M_out.pkl', 'Harris_50K_out.pkl']
 	
 	for i in range(2):
-		run_ga(fname=fnames[i], f_out=f_outs[i], subsample=None)
+		run_ga(fname=home_dir + fnames[i], f_out=home_dir + f_outs[i], subsample=None)
 
 	# print(get_data('Harris_array_1M.csv'))
 	# save_array(ar1_1, fname="Harris_array_1M_labels.csv")

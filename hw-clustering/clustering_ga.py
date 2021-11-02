@@ -149,7 +149,7 @@ def main():
 	fnames = ['Harris_array_1M.csv', 'Harris_array_50K.csv']
 	f_outs = ['Harris_1M_out.pkl', 'Harris_50K_out.pkl']
 	
-	for i in range(len(2)):
+	for i in range(2):
 		run_ga(fname=fnames[i], f_out=f_outs[i], subsample=None)
 
 	# print(get_data('Harris_array_1M.csv'))

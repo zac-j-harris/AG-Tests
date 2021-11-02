@@ -24,8 +24,8 @@ def get_fitness(population, arr):
 		num_clustroids = len(set_clustroids)
 		m_mse = sum([ min([squared_error(clust, p) for clust in set_clustroids]) for p in arr]) / len(arr)
 		
-		# fitness[p_i] = (1.0 / m_mse) * (pop_size / num_clustroids)
-		fitness[p_i] = (1.0 / m_mse)
+		fitness[p_i] = (1.0 / m_mse) * (pop_size / num_clustroids)
+		# fitness[p_i] = (1.0 / m_mse)
 
 	return fitness
 
@@ -62,7 +62,7 @@ def crossover(population, fitness, elites, fit_cutoff):
 
 def get_elites(fitness, elitism, selection_rate):
 	# print("Gathering elites")
-	elites = [-1 for _ in range(int(len(fitness) * elitism))]
+	elites = [-1 for _ in range(max(int(len(fitness) * elitism)), 1)]
 	fit_cutoff = max(fitness)+1
 	kept_count = 0
 	count = 0
@@ -104,7 +104,7 @@ def mutate(population, elites, mutation_rate, mutation_perc, struct_mut, m_fit, 
 	return new_pop
 
 
-def run_ga(fname, f_out, population_size=30, elitism=0.1, mutation_rate=0.3, mutation_perc=0.15, struct_mut=0.3, selection_rate=0.9, subsample=0.10, min_generations=50):
+def run_ga(fname, f_out, population_size=5, elitism=0.1, mutation_rate=1.0, mutation_perc=0.50, struct_mut=0.3, selection_rate=0.8, subsample=0.10, min_generations=50):
 
 	arr, dim = get_data(fname, subsample=subsample)
 	clustroid_num = [1 for _ in range(population_size)]

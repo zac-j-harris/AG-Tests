@@ -152,7 +152,7 @@ def main():
 	f_outs = ['Harris_1M_out.pkl', 'Harris_50K_out.pkl']
 	
 	for i in range(2):
-		run_ga(fname=home_dir + fnames[i], f_out=home_dir + f_outs[i], subsample=None)
+		run_ga(fname=home_dir + fnames[i], f_out=home_dir + f_outs[i], subsample=0.02)
 
 	# print(get_data('Harris_array_1M.csv'))
 	# save_array(ar1_1, fname="Harris_array_1M_labels.csv")

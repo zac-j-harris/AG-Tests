@@ -146,10 +146,11 @@ def run_ga(fname, f_out, population_size=30, elitism=0.1, mutation_rate=0.3, mut
 
 def main():
 	# quit()
-	fname = 'Harris_array_1M.csv'
-	f_out = 'Harris_1M_out.pkl'
-
-	run_ga(fname=fname, f_out=f_out, subsample=0.01)
+	fnames = ['Harris_array_1M.csv', 'Harris_array_50K.csv']
+	f_outs = ['Harris_1M_out.pkl', 'Harris_50K_out.pkl']
+	
+	for i in range(len(2)):
+		run_ga(fname=fnames[i], f_out=f_outs[i], subsample=None)
 
 	# print(get_data('Harris_array_1M.csv'))
 	# save_array(ar1_1, fname="Harris_array_1M_labels.csv")

@@ -153,7 +153,10 @@ def create_weighted_dict():
 		
 		count = 0
 		val = frontier[0][0]
-		while frontier[count][0] == val:
+		while frontier[count][0] == val:  
+			# each state in frontier is given utility as an end point 
+			# 	- i.e. given utility from opponent's moves
+
 			child_boards = GetBoardMoves(1, change_player(get_list_board(frontier[count][1])) )
 			child_utils = [dict_out[str(b)] for b in child_boards]
 			current_util = 0
@@ -167,7 +170,7 @@ def create_weighted_dict():
 
 			if all([dict_out[str(b)] != -10 for b in child_boards]):
 				# current_util = min(child_utils) * -1.0
-				dict_out[frontier[count][1]] = min(child_utils) * -1.0
+				dict_out[frontier[count][1]] = max(child_utils) * -1.0
 				# visited.append((frontier[count], current_util))
 				len_visited += 1
 				continue

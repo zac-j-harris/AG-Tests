@@ -2,11 +2,6 @@
 # @author - Zachary Harris
 #
 
-
-'''
-TODO: modify that to include known values for heuristic function (to shorten search)
-'''
-
 from tictac_methods import *
 import time, logging, pickle, itertools, random, lzma
 from tqdm import tqdm

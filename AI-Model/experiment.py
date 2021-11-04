@@ -58,7 +58,7 @@ def main():
 	# __create_test_dict__()
 
 
-	create_weighted_dict(Testing=True)
+	create_weighted_dict()
 
 
 # def __create_keys__(new_Board): #O(n^2) ~ 490 Trillion
@@ -167,7 +167,7 @@ def create_weighted_dict(Testing):
 
 			if all([dict_out[str(b)] != -10 for b in child_boards]):
 				# current_util = min(child_utils) * -1.0
-				dict_out[frontier[count][1]] = max(child_utils) * -1.0
+				dict_out[frontier[count][1]] = min(child_utils) * -1.0
 				# visited.append((frontier[count], current_util))
 				len_visited += 1
 				continue

@@ -35,7 +35,7 @@ def get_util_old(init_MoveList):
 	# value = [-1.0 * i for i in bfs(q)]
 	value = bfs(q)
 	num_condense = [len(GetBoardMoves(change_player(b))) for b in q]
-	value = [-1.0* sum(value[i+sum(num_condense[:i]):i+sum(num_condense[:i+1])])/(num_condense[i]) for i in range(len(queue))]
+	value = [-1.0* sum(value[i+sum(num_condense[:i]):i+sum(num_condense[:i+1])])/(num_condense[i]) for i in range(len(q))]
 	# value = [sum(value)]
 	# return sum(value) / len(value), newfound_depth + 1
 	return value
@@ -63,7 +63,7 @@ def get_util(Player, MoveList, dict_vals, depth=1, sim=False):
 	sim_i1 = random.randint(0, len(MoveList)-1) if sim else 0
 	for move_i in range(len(MoveList)):
 		move_i = sim_i1 if sim else move_i
-		move = MoveList[move_i]
+		# move = MoveList[move_i]
 		# board_i = ApplyMove(Board, move)
 		board_i = MoveList[move_i]
 

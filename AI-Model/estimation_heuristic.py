@@ -60,7 +60,7 @@ relative_moves = [(-1,0), (0,-1), (0,1), (1,0)]
 
 
 
-def get_util(Player, MoveList, depth=1, sim=False):
+def get_util(Player, MoveList, dict_vals, depth=1, sim=False):
 	# global RUNTIME_COUNTER, MAX_DEPTH
 	value = [0 for _ in MoveList]
 	# MAX_DEPTH = depth * 2 - 1 if MAX_DEPTH < depth * 2 - 1 else MAX_DEPTH
@@ -72,12 +72,16 @@ def get_util(Player, MoveList, depth=1, sim=False):
 		# board_i = ApplyMove(Board, move)
 		board_i = MoveList[move_i]
 
-		if Win(Player, board_i):
+		if dict_vals[str(board_i)] != -10:
+			value[move_i] = dict_vals[str(board_i)]
+			continue
+		elif Win(Player, board_i):
 			# value[move_i] = 1 / depth
 			value[move_i] = 1
 			break
 		else:
-			op_moves = GetMoves(Player * -1, board_i)
+			# op_moves = GetMoves(Player * -1, board_i)
+			op_moves = GetBoardMoves(1, change_player(board_i))
 			num_trials = 1
 			if run_MonteCarlo_sims:
 				if not sim: # if not in middle of MC simulation
@@ -89,19 +93,24 @@ def get_util(Player, MoveList, depth=1, sim=False):
 			else:
 				op_moves = op_moves
 
+			num_trials = 0
 			for op_move_i in range(len(op_moves)):
+				num_trials += 1
 				# MAX_DEPTH = depth * 2 if MAX_DEPTH < depth * 2 else MAX_DEPTH
 				# RUNTIME_COUNTER += 20
-				op_move = op_moves[op_move_i]
+				board_ij = op_moves[op_move_i]
 				# MiniMax, with alpha-beta pruning
-				board_ij = ApplyMove(board_i, op_move)
-				if Win(Player*-1, board_i):     # Opposition wins, prune
+				# board_ij = ApplyMove(board_i, op_move)
+				if dict_vals[str(board_ij)] != -10:
+					value[move_i] = -1.0 * dict_vals[str(board_ij)]
+					continue 
+				elif Win(1, board_ij):     # Opposition wins, prune
 					# value[move_i] = -1 / depth
 					value[move_i] = -1
 					break
 				# continue
 				elif depth < MaxDepth:
-					minimax = get_util(Player, GetMoves(Player, board_ij), depth=depth + 1, sim=run_MonteCarlo_sims)
+					minimax = get_util(Player, GetBoardMoves(1, change_player(board_ij)), depth=depth + 1, sim=run_MonteCarlo_sims)
 					if run_MonteCarlo_sims:
 						# value[move_i] += minimax / depth
 						value[move_i] += minimax

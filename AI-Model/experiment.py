@@ -136,7 +136,7 @@ def create_weighted_dict():
 	# for (board, util) in tqdm( visited ):
 	# 
 
-	for b, util in tqdm( [(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != 0
+	for b, util in tqdm( [(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != -10
 	                      for ch_b in GetBoardMoves(dict_out[board], get_list_board(board))]):
 		if not Win(util, b):
 			len_visited += 1

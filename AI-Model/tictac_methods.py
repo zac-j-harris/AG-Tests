@@ -65,6 +65,10 @@ def ShowBoard (Board, vals):
 	print("")
 
 
+def change_player(board):
+		return [[-1 * i if abs(i) == 1 else i for i in row] for row in board]
+
+
 def ApplyMove (Board, Move, Empty=0):
 	#-------------------------------------------------------------------------
 	# Perform the given move, and update Board.

@@ -43,7 +43,7 @@ def get_util_old(init_MoveList):
 
 
 # min_MonteCarlo_trials = 5000 # 1000
-max_MonteCarlo_trials = 25000 # 1000
+max_MonteCarlo_trials = 5000 # 1000
 run_MonteCarlo_sims = True
 MaxDepth = 30 if run_MonteCarlo_sims else 2 # goes by 2, so 5 is actually a search depth of 10
 # num_playthroughs = 1
@@ -123,3 +123,33 @@ def get_util(Player, MoveList, dict_vals, depth=1, sim=False):
 		return value
 	else:
 		return sum(value) / len(value)
+
+
+
+def get_utility(x_in):
+	# cur_board, dict_out = x_in
+	child_boards = GetBoardMoves(1, change_player(get_list_board(x_in[0])))
+	child_utils = [x_in[1][str(b)] for b in child_boards]
+
+	if all([i != -10 for i in child_utils]):
+		# current_util = min(child_utils) * -1.0
+		return max(child_utils) * -1.0
+		# visited.append((frontier[count], current_util))
+	else:
+		# val = get_util(Player=1, MoveList=[get_list_board(frontier[count][1])], dict_vals=dict_out)
+		# val = val if type(val) != list else val[0]
+		vis_child = [None if child_utils[i] == -10 else child_boards[i] for i in range(len(child_boards))]
+		n_vis_child = [None if child_utils[i] != -10 else child_boards[i] for i in range(len(child_boards))]
+		utils = [0 if child_utils[i] == -10 else -1.0 * child_utils[i] for i in range(len(child_boards))]
+
+		n_vis_childs_reduced = [i for i in n_vis_child if not (i is None)]
+
+		# vals = get_util(n_vis_childs_reduced)
+		vals = get_util(Player=1, MoveList=n_vis_childs_reduced, dict_vals=x_in[1])
+
+		temp_val_counter = 0
+		for i in range(len(utils)):
+			if vis_child[i] is None:
+				utils[i] = -1.0 * vals[temp_val_counter]
+				temp_val_counter += 1
+		return min(utils)  # Minimized because child would pick their best

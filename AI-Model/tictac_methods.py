@@ -116,3 +116,6 @@ def Win (Player, Board):
 				if get_diag(h_c, v_c, row, col):
 					return True
 	return False
+
+def get_list_board(str_board):
+	return [[int(j) for j in row.split(', ')] for row in str_board.replace('[', '').replace(']]', '').split('],')]

@@ -18,6 +18,7 @@ from tictac_methods import *
 import time, logging, pickle, itertools, random, lzma
 from tqdm import tqdm
 from estimation_heuristic import *
+import multiprocessing as mp
 
 logger = logging.getLogger("Main")
 logging.basicConfig(level=logging.DEBUG)
@@ -128,69 +129,49 @@ def create_weighted_dict():
 		if dict_out[k] == 0:
 			dict_out[k] = -10
 
-	def get_list_board(str_board):
-		return [[int(j) for j in row.split(', ')] for row in str_board.replace('[', '').replace(']]', '').split('],')]
-
 	# # Add all 1-prior to visited with val 1. (Basically the step into a winning state)
-	visited = [(i, dict_out[i]) for i in dict_out if dict_out[i] != 0]
+	len_visited = sum( [1 for i in dict_out if dict_out[i] != 0] )
 
 	# t = [(b, util) for (board, util) in visited for b in GetBoardMoves(util, get_list_board(board))]
 	# for (board, util) in tqdm( visited ):
 	# 
 
-	for b, util in tqdm( [(b, util) for (board, util) in visited for b in GetBoardMoves(util, get_list_board(board))] ):
+	for b, util in tqdm( [(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != 0
+	                      for ch_b in GetBoardMoves(dict_out[board], get_list_board(board))]):
 		if not Win(util, b):
-			visited.append((str(b), util))
+			len_visited += 1
 			dict_out[str(b)] = util
 
-	len_dict = len(dict_out.keys())
-	frontier = sorted([(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b) for b in tqdm( dict_out ) if dict_out[b] == -10], reverse=True)
+	# len_dict = len(dict_out.keys())
+	frontier = sorted([(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
+	                   for b in tqdm( dict_out ) if dict_out[b] == -10], reverse=True)
 
-	pbar = tqdm(total=len_dict)
-	len_visited = len(visited)
+	pbar = tqdm(total=len(frontier))
+	# len_visited = len(visited)
+	# len_visited = len(visited)
 	print('Beginning secondary iteration.')
 	temp_num_vis = frontier[0][0]
 	while frontier != []:
-		pbar.update(1)
-		
-		cur_num_vis, cur_board = frontier.pop()
-		if cur_num_vis != temp_num_vis:
-			frontier = sorted([(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b) for _, b in frontier], reverse=True)
-			temp_num_vis = cur_num_vis
+		count = 0
+		pool = mp.Pool(mp.cpu_count())
+		mp_boards = []
+		while frontier[0][0] == temp_num_vis:
+			_, cur_board = frontier.pop()
+			mp_boards.append(cur_board)
+			count += 1
+		utilities = list(pool.map(get_utility, [(b, dict_out) for b in mp_boards]))
+		pool.close()
+		pbar.update(count)
+
 		# each state in frontier is given utility as an end point
 		# 	- i.e. given utility from opponent's moves
-
-		child_boards = GetBoardMoves(1, change_player(get_list_board(cur_board)) )
-		child_utils = [dict_out[str(b)] for b in child_boards]
-
-		if all([i != -10 for i in child_utils]):
-			# current_util = min(child_utils) * -1.0
-			dict_out[cur_board] = max(child_utils) * -1.0
-			# visited.append((frontier[count], current_util))
-			len_visited += 1
-		else:
-			# val = get_util(Player=1, MoveList=[get_list_board(frontier[count][1])], dict_vals=dict_out)
-			# val = val if type(val) != list else val[0]
-			vis_child = [None if child_utils[i] == -10 else child_boards[i] for i in range(len(child_boards))]
-			n_vis_child = [None if child_utils[i] != -10 else child_boards[i] for i in range(len(child_boards))]
-			utils = [0 if child_utils[i] == -10 else -1.0 * child_utils[i] for i in range(len(child_boards))]
-
-			n_vis_childs_reduced = [i for i in n_vis_child if not (i is None)]
-
-
-			# vals = get_util(n_vis_childs_reduced)
-			vals = get_util(Player=1, MoveList=n_vis_childs_reduced, dict_vals=dict_out)
-
-			temp_val_counter = 0
-			for i in range(len(utils)):
-				if vis_child[i] is None:
-					utils[i] = -1.0 * vals[temp_val_counter]
-					temp_val_counter += 1
-
-			# sum(utils) / len(utils)
-			dict_out[cur_board] = min(utils)  # Minimized because child would pick their best
-			# visited.append((frontier[count], current_util))
-			len_visited += 1
+		for b_i in range(len(mp_boards)):
+			cur_board = mp_boards[b_i]
+			dict_out[cur_board] = utilities[b_i]
+		frontier = sorted([(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b) for _, b in frontier], reverse=True)
+		temp_num_vis = frontier[0][0]
+		# visited.append((frontier[count], current_util))
+		len_visited += 1
 
 	pbar.close()
 	save_dict(dict_out, fname='./comp_weighted_dict.xz')

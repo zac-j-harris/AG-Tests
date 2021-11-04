@@ -148,6 +148,7 @@ def create_weighted_dict():
 
 	pbar = tqdm(total=len_dict)
 	len_visited = len(visited)
+	print('Beginning secondary iteration.')
 	temp_num_vis = frontier[0][0]
 	while frontier != []:
 		pbar.update(1)

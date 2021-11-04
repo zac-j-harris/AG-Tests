@@ -143,22 +143,32 @@ def create_weighted_dict():
 			dict_out[str(b)] = util
 
 	# len_dict = len(dict_out.keys())
-	frontier = sorted([(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
-	                   for b in tqdm( dict_out ) if dict_out[b] == -10], reverse=True)
+	def pop_inds(l, indexes):
+		popped = []
+		for i in sorted(indexes, reverse=True):
+			popped.append(l[i][1])
+			del l[i]
+		return l, popped
+
+	def pop_top(l):
+		m = max([i[0] for i in l])
+		inds = []
+		for i in range(len(l)):
+			if l[i][0] == m:
+				inds.append(i)
+		return pop_inds(l, inds)
+
+	frontier = [(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
+	            for b in tqdm( dict_out ) if dict_out[b] == -10]
 
 	pbar = tqdm(total=len(frontier))
-	# len_visited = len(visited)
-	# len_visited = len(visited)
 	print('Beginning secondary iteration.')
-	temp_num_vis = frontier[0][0]
+
 	while frontier != []:
-		count = 0
+		frontier, mp_boards = pop_top(frontier)
+		count = len(mp_boards)
 		pool = mp.Pool(mp.cpu_count())
-		mp_boards = []
-		while frontier[0][0] == temp_num_vis:
-			_, cur_board = frontier.pop()
-			mp_boards.append(cur_board)
-			count += 1
+
 		utilities = list(pool.map(get_utility, [(b, dict_out) for b in mp_boards]))
 		pool.close()
 		pbar.update(count)
@@ -168,10 +178,9 @@ def create_weighted_dict():
 		for b_i in range(len(mp_boards)):
 			cur_board = mp_boards[b_i]
 			dict_out[cur_board] = utilities[b_i]
-		frontier = sorted([(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b) for _, b in frontier], reverse=True)
-		temp_num_vis = frontier[0][0]
-		# visited.append((frontier[count], current_util))
 		len_visited += 1
+		frontier = [(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
+		            for _, b in frontier]
 
 	pbar.close()
 	save_dict(dict_out, fname='./comp_weighted_dict.xz')

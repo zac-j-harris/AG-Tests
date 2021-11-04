@@ -201,7 +201,7 @@ def create_weighted_dict():
 				
 				# sum(utils) / len(utils)
 				# max(utils)
-				dict_out[frontier[count][1]] = max(utils)
+				dict_out[frontier[count][1]] = min(utils)
 				# visited.append((frontier[count], current_util))
 				len_visited += 1
 				continue

@@ -4,17 +4,20 @@
 import copy
 
 relative_moves = [(-1,0), (0,-1), (0,1), (1,0)]
+NumRows = 5
+NumCols = 4
+Empty=0
 
 def GetBoardMoves(Player, Board):
-	MoveList = []
 	p_locations = [(i, j) for i in range(1, NumRows+1) for j in range(1, NumCols+1) if Board[i][j] == Player]
-	for (i, j) in p_locations:
-		#-------------------------------------------------------------
-		#  Check move directions (m,n) = (-1,0), (0,-1), (0,1), (1,0)
-		#-------------------------------------------------------------
-		for m, n in relative_moves:
-			if Board[i + m][j + n] == Empty:
-				MoveList.append([i, j, i+m, j+n])
+	MoveList = [[i, j, i+m, j+n] for (i, j) in p_locations for m, n in relative_moves if Board[i + m][j + n] == Empty]
+	# for (i, j) in p_locations:
+	# 	#-------------------------------------------------------------
+	# 	#  Check move directions (m,n) = (-1,0), (0,-1), (0,1), (1,0)
+	# 	#-------------------------------------------------------------
+	# 	for m, n in relative_moves:
+	# 		if Board[i + m][j + n] == Empty:
+	# 			MoveList.append([i, j, i+m, j+n])
 	out = [ApplyMove(Board, move) for move in MoveList]
 	return out
 

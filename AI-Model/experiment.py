@@ -229,16 +229,16 @@ def create_weighted_dict(Testing):
 			child_utils = [dict_out[str(b)] for b in child_boards]
 			current_util = 0
 			
-			if min(child_utils) == -1:
-				# current_util = 1.0
-				dict_out[frontier[count][1]] = 1.0
-				# visited.append((frontier[count], current_util))
-				len_visited += 1
-				continue
+			# if min(child_utils) == -1:
+			# 	# current_util = 1.0
+			# 	dict_out[frontier[count][1]] = 1.0
+			# 	# visited.append((frontier[count], current_util))
+			# 	len_visited += 1
+			# 	continue
 
 			if all([dict_out[str(b)] != -10 for b in child_boards]):
 				# current_util = min(child_utils) * -1.0
-				dict_out[frontier[count][1]] = min(child_utils) * -1.0
+				dict_out[frontier[count][1]] = max(child_utils) * -1.0
 				# visited.append((frontier[count], current_util))
 				len_visited += 1
 				continue

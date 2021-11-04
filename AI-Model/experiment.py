@@ -14,11 +14,23 @@ def main():
 	vals = {"BoardRows":6, "BoardCols":5, "NumRows": 5, "NumCols": 4, "OutOfBounds":2, "Empty":0, "x":-1, "o":1}
 	unfinished_Board = [[0 for _ in range(vals["BoardCols"] + 1)] for __ in range(vals["BoardRows"] + 1)]
 	InitBoard(unfinished_Board, vals=vals)
+	# unfinished_Board = [tuple([j for j in i]) for i in unfinished_Board]
+	# print(unfinished_Board)
 	original_Board = copy.deepcopy(unfinished_Board)
 
 	Board = copy.deepcopy(unfinished_Board)
 
 	ShowBoard(Board, vals=vals)
+
+	# test = [str([j for j in range(i, i+11)]) for i in range(3)]
+	# print(test)
+	# test2 = dict.fromkeys(test)
+	# print(test2)
+	# for i in test2:
+	# 	print(i)
+	# 	print(type(i))
+	# 	test2[i] = 1
+
 
 	zeros_Board = [[j if j==2 else 0 for j in i] for i in Board]
 	create_base_dict(zeros_Board)
@@ -63,6 +75,7 @@ def __create_keys_opti__(zeros_Board):
 			t_Board = copy.deepcopy(zeros_Board)
 			for i in n_range:
 				t_Board[p_locations[i][0]][p_locations[i][1]] = 1 if i in orientation else -1
+				# t_Board[p_locations[i][0]] = tuple([ (1 if i in orientation else -1) if j==p_locations[i][1] else j for j in range(len(t_Board[p_locations[i][0]])) ])
 			w_1  = Win( 1, t_Board)
 			w_n1 = Win(-1, t_Board)
 			if w_1 and w_n1:
@@ -77,17 +90,17 @@ def __create_keys_opti__(zeros_Board):
 			keys[count] = t_Board
 			count += 1
 
-	keys = [i for i in keys if not (i is None)]
+	keys = [str(i) for i in keys if not (i is None)]
 	vals = [vals[i] for i in range(len(keys))]
 	return keys, vals
 			
 def create_base_dict(zeros_Board):
 	keys, vals = __create_keys_opti__(zeros_Board)
-	dict_out = dict.fromkeys(keys)
+	base_dict = dict.fromkeys(keys)
 	# Add all winning states to the visited with val 1.
-	for i in keys:
-		dict_out[i] = vals[i]
-	save_dict(dict_out)
+	for i in range(len(keys)):
+		base_dict[keys[i]] = vals[i]
+	save_dict(base_dict)
 
 
 def create_dict(zeros_Board):

@@ -120,7 +120,7 @@ def create_base_dict(zeros_Board):
 
 
 
-def create_weighted_dict(Testing):
+def create_weighted_dict():
 
 	dict_out = load_dict()
 

@@ -199,7 +199,7 @@ def create_weighted_dict():
 		for b_i in range(len(mp_boards)):
 			cur_board = mp_boards[b_i]
 			dict_out[cur_board] = utilities[b_i]
-		len_visited += 1
+
 		frontier = list(
 			map(lambda v: (sum([1 for ch in GetBoardMoves(1, get_list_board(v[1])) if dict_out[str(ch)] != -10]), v[1]),
 			    frontier))

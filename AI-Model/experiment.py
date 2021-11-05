@@ -171,9 +171,12 @@ def create_weighted_dict():
 		return pop_inds(l, inds)
 
 	frontier = [(-100, b) for b in dict_out if dict_out[b] == -10]
-	for i in tqdm(range(len(frontier))):
-		frontier[i] = (sum([1 for ch in GetBoardMoves(1, get_list_board(frontier[i][1])) if dict_out[str(ch)] != -10]),
-		               frontier[i][1])
+	frontier = list(
+		map(lambda v: (sum([1 for ch in GetBoardMoves(1, get_list_board(v[1])) if dict_out[str(ch)] != -10]), v[1]),
+		    frontier))
+
+	save_dict(frontier, fname='./comp_frontier_base.xz')
+	save_dict(dict_out, fname='./comp_dict_prepped.xz')
 
 	pbar = tqdm(total=len(frontier))
 	print('Beginning secondary iteration.')
@@ -193,10 +196,9 @@ def create_weighted_dict():
 			cur_board = mp_boards[b_i]
 			dict_out[cur_board] = utilities[b_i]
 		len_visited += 1
-		for i in range(len(frontier)):
-			frontier[i] = (sum([1 for ch in GetBoardMoves(1, get_list_board(frontier[i][1]))
-			                    if dict_out[str(ch)] != -10]),
-			               frontier[i][1])
+		frontier = list(
+			map(lambda v: (sum([1 for ch in GetBoardMoves(1, get_list_board(v[1])) if dict_out[str(ch)] != -10]), v[1]),
+			    frontier))
 		# frontier = [(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
 		#             for _, b in frontier]
 

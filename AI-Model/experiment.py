@@ -46,8 +46,8 @@ def main():
 	# 	test2[i] = 1
 
 
-	zeros_Board = [[j if j==2 else 0 for j in i] for i in Board]
-	create_base_dict(zeros_Board)
+	# zeros_Board = [[j if j==2 else 0 for j in i] for i in Board]
+	# create_base_dict(zeros_Board)
 	# def __create_test_dict__():
 	# 	dict_out = load_dict()
 	# 	keys = list(dict_out.keys())[:int(len(dict_out)*0.01)]
@@ -122,20 +122,20 @@ def create_base_dict(zeros_Board):
 
 def create_weighted_dict():
 
-	dict_out = load_dict()
-
-	for k in dict_out:
-		if dict_out[k] == 0:
-			dict_out[k] = -10
-
-	# # Add all 1-prior to visited with val 1. (Basically the step into a winning state)
-	len_visited = sum( [1 for i in dict_out if dict_out[i] != 0] )
-
-	for b, util in tqdm([(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != -10
-	                     for ch_b in GetBoardMoves(dict_out[board], get_list_board(board))]):
-		if not Win(util, b):
-			len_visited += 1
-			dict_out[str(b)] = util
+	# dict_out = load_dict()
+	#
+	# for k in dict_out:
+	# 	if dict_out[k] == 0:
+	# 		dict_out[k] = -10
+	#
+	# # # Add all 1-prior to visited with val 1. (Basically the step into a winning state)
+	# len_visited = sum( [1 for i in dict_out if dict_out[i] != 0] )
+	#
+	# for b, util in tqdm([(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != -10
+	#                      for ch_b in GetBoardMoves(dict_out[board], get_list_board(board))]):
+	# 	if not Win(util, b):
+	# 		len_visited += 1
+	# 		dict_out[str(b)] = util
 
 	'''t = [(b, util) for (board, util) in visited for b in GetBoardMoves(util, get_list_board(board))]
 	for (board, util) in tqdm( visited ):
@@ -170,16 +170,16 @@ def create_weighted_dict():
 				inds.append(i)
 		return pop_inds(l, inds)
 
-	frontier = [(-100, b) for b in dict_out if dict_out[b] == -10]
-	frontier = list(
-		map(lambda v: (sum([1 for ch in GetBoardMoves(1, get_list_board(v[1])) if dict_out[str(ch)] != -10]), v[1]),
-		    frontier))
+	# frontier = [(-100, b) for b in dict_out if dict_out[b] == -10]
+	# frontier = list(
+	# 	map(lambda v: (sum([1 for ch in GetBoardMoves(1, get_list_board(v[1])) if dict_out[str(ch)] != -10]), v[1]),
+	# 	    frontier))
+	#
+	# save_dict(frontier, fname='./comp_frontier_base.xz')
+	# save_dict(dict_out, fname='./comp_dict_prepped.xz')
 
-	save_dict(frontier, fname='./comp_frontier_base.xz')
-	save_dict(dict_out, fname='./comp_dict_prepped.xz')
-
-	# frontier = load_dict(fname='./comp_frontier_base.xz')
-	# dict_out = load_dict(fname='./comp_dict_prepped.xz')
+	frontier = load_dict(fname='./comp_frontier_base.xz')
+	dict_out = load_dict(fname='./comp_dict_prepped.xz')
 
 	pbar = tqdm(total=len(frontier))
 	print('Beginning secondary iteration.')

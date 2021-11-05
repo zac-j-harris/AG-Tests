@@ -85,7 +85,7 @@ def __create_keys_opti__(zeros_Board):
 	n_range = range(8)
 	keys = [None for _ in range(125970*len(inner_combs))]
 	vals = [0 for _ in range(len(keys))]
-	count = 0
+	counter = 0
 	for p_locations in tqdm( list(itertools.combinations([(i//4+1,i%4+1) for i in range(20)], 8)) ):  # O(n) ~ 140 mil
 		for orientation in inner_combs:
 			t_Board = copy.deepcopy(zeros_Board)
@@ -99,12 +99,12 @@ def __create_keys_opti__(zeros_Board):
 			elif w_1:
 				vals[i] = 1
 			elif w_n1:
-				vals[count] = -1
+				vals[counter] = -1
 			else:
-				vals[count] = 0
+				vals[counter] = 0
 
-			keys[count] = t_Board
-			count += 1
+			keys[counter] = t_Board
+			counter += 1
 
 	keys = [str(i) for i in keys if not (i is None)]
 	vals = [vals[i] for i in range(len(keys))]
@@ -132,16 +132,28 @@ def create_weighted_dict():
 	# # Add all 1-prior to visited with val 1. (Basically the step into a winning state)
 	len_visited = sum( [1 for i in dict_out if dict_out[i] != 0] )
 
-	# t = [(b, util) for (board, util) in visited for b in GetBoardMoves(util, get_list_board(board))]
-	# for (board, util) in tqdm( visited ):
-	# 
-
-	for b, util in tqdm( [(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != -10
-	                      for ch_b in GetBoardMoves(dict_out[board], get_list_board(board))]):
+	for b, util in tqdm([(ch_b, dict_out[board]) for board in dict_out if dict_out[board] != -10
+	                     for ch_b in GetBoardMoves(dict_out[board], get_list_board(board))]):
 		if not Win(util, b):
 			len_visited += 1
 			dict_out[str(b)] = util
 
+	# t = [(b, util) for (board, util) in visited for b in GetBoardMoves(util, get_list_board(board))]
+	# for (board, util) in tqdm( visited ):
+	#
+	# count = 0
+	# for ch_bs, board in tqdm([ (GetBoardMoves(dict_out[board], get_list_board(board)), board)
+	#                           for board in dict_out if dict_out[board] != -10]):
+		# n_known = 0
+		# for ch_b in ch_bs:
+			# if dict_out[str(ch_b)] != -10:
+				# n_known += 1
+			# if not Win(dict_out[board], ch_b):
+			# 	len_visited += 1
+			# 	dict_out[str(ch_b)] = dict_out[board]
+		# frontier[count] = (n_known, board)
+		# count += 1
+	# frontier = [i for i in frontier if not (i is None)]
 	# len_dict = len(dict_out.keys())
 	def pop_inds(l, indexes):
 		popped = []
@@ -158,20 +170,22 @@ def create_weighted_dict():
 				inds.append(i)
 		return pop_inds(l, inds)
 
-	frontier = [(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
-	            for b in tqdm( dict_out ) if dict_out[b] == -10]
+	frontier = [(-100, b) for b in dict_out if dict_out[b] == -10]
+	for i in tqdm(range(len(frontier))):
+		frontier[i] = (sum([1 for ch in GetBoardMoves(1, get_list_board(frontier[i][1])) if dict_out[str(ch)] != -10]),
+		               frontier[i][1])
 
 	pbar = tqdm(total=len(frontier))
 	print('Beginning secondary iteration.')
 
 	while frontier != []:
 		frontier, mp_boards = pop_top(frontier)
-		count = len(mp_boards)
+		counter = len(mp_boards)
 		pool = mp.Pool(mp.cpu_count())
 
 		utilities = list(pool.map(get_utility, [(b, dict_out) for b in mp_boards]))
 		pool.close()
-		pbar.update(count)
+		pbar.update(counter)
 
 		# each state in frontier is given utility as an end point
 		# 	- i.e. given utility from opponent's moves
@@ -179,8 +193,12 @@ def create_weighted_dict():
 			cur_board = mp_boards[b_i]
 			dict_out[cur_board] = utilities[b_i]
 		len_visited += 1
-		frontier = [(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
-		            for _, b in frontier]
+		for i in range(len(frontier)):
+			frontier[i] = (sum([1 for ch in GetBoardMoves(1, get_list_board(frontier[i][1]))
+			                    if dict_out[str(ch)] != -10]),
+			               frontier[i][1])
+		# frontier = [(sum([1 if dict_out[str(ch)] != -10 else 0 for ch in GetBoardMoves(1, get_list_board(b))]), b)
+		#             for _, b in frontier]
 
 	pbar.close()
 	save_dict(dict_out, fname='./comp_weighted_dict.xz')

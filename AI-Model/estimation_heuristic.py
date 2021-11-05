@@ -44,8 +44,8 @@ def get_util_old(init_MoveList):
 
 # min_MonteCarlo_trials = 5000 # 1000
 max_MonteCarlo_trials = 5000 # 1000
-run_MonteCarlo_sims = True
-MaxDepth = 30 if run_MonteCarlo_sims else 2 # goes by 2, so 5 is actually a search depth of 10
+# run_MonteCarlo_sims = True
+MaxDepth = 30 # if run_MonteCarlo_sims else 2 # goes by 2, so 5 is actually a search depth of 10
 # num_playthroughs = 1
 # pruning = True
 
@@ -65,28 +65,25 @@ def get_util(Player, MoveList, dict_vals, depth=1, sim=False):
 		move_i = sim_i1 if sim else move_i
 		# move = MoveList[move_i]
 		# board_i = ApplyMove(Board, move)
-		board_i = MoveList[move_i]
+		# board_i = MoveList[move_i]
 
-		if dict_vals[str(board_i)] != -10:
-			value[move_i] = dict_vals[str(board_i)]
+		if dict_vals[str(MoveList[move_i])] != -10:
+			value[move_i] = dict_vals[str(MoveList[move_i])]
 			continue
-		elif Win(Player, board_i):
+		elif Win(Player, MoveList[move_i]):
 			# value[move_i] = 1 / depth
 			value[move_i] = 1
 			break
 		else:
 			# op_moves = GetMoves(Player * -1, board_i)
-			op_moves = GetBoardMoves(1, change_player(board_i))
+			op_moves = GetBoardMoves(1, change_player(MoveList[move_i]))
 			num_trials = 1
-			if run_MonteCarlo_sims:
-				if not sim: # if not in middle of MC simulation
-					num_trials = max_MonteCarlo_trials
-				try:
-					op_moves = [random.choice(op_moves) for i in range(num_trials)]
-				except:
-					continue
-			else:
-				op_moves = op_moves
+			if not sim: # if not in middle of MC simulation
+				num_trials = max_MonteCarlo_trials
+			try:
+				op_moves = [random.choice(op_moves) for i in range(num_trials)]
+			except:
+				continue
 
 			num_trials = 0
 			for op_move_i in range(len(op_moves)):
@@ -103,14 +100,12 @@ def get_util(Player, MoveList, dict_vals, depth=1, sim=False):
 					# value[move_i] = -1 / depth
 					value[move_i] = -1
 					break
-				# continue
 				elif depth < MaxDepth:
-					minimax = get_util(Player, GetBoardMoves(1, change_player(board_ij)), depth=depth + 1, sim=run_MonteCarlo_sims)
-					if run_MonteCarlo_sims:
-						# value[move_i] += minimax / depth
-						value[move_i] += minimax
-					else:
-						value[move_i] = minimax if (minimax < value[move_i]) or (value[move_i] == 0) else value[move_i]
+					# minimax = get_util(Player, GetBoardMoves(1, change_player(board_ij)), depth=depth + 1, sim=True)
+					# value[move_i] += minimax / depth
+					value[move_i] += get_util(Player, GetBoardMoves(1, change_player(board_ij)), depth=depth + 1, sim=True)
+					# else:
+					# 	value[move_i] = minimax if (minimax < value[move_i]) or (value[move_i] == 0) else value[move_i]
 					# if (value[move_i] <= max(value) or value[move_i] < 0) and op_move_i >= min_MonteCarlo_trials and pruning:
 					# 	# Minimal value less than other branch min, prune
 					# 	break

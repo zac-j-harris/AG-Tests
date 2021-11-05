@@ -98,9 +98,10 @@ def Win (Player, Board):
 				return False
 		return True
 
-	for col in range(1,5):
+	in_a_row = [0 for _ in Board]
+	for col in range(1, 5):
 		in_a_col = 0
-		in_a_row = [i[col] + 1 if i[col] == Player else 0 for i in Board]
+		in_a_row = [in_a_row[i] + 1 if Board[i][col] == Player else 0 for i in range(len(Board))]
 		for row in range(1,6):
 			# Test vertical & horizontal scoring
 			in_a_col = in_a_col + 1 if Board[row][col] == Player else 0

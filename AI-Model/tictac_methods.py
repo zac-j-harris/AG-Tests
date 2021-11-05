@@ -19,8 +19,11 @@ def GetBoardMoves(Player, Board):
 	# 		if Board[i + m][j + n] == Empty:
 	# 			MoveList.append([i, j, i+m, j+n])
 	out = [ApplyMove(Board, move) for move in MoveList]
+	out = [b for b in out if __is_valid__(b)]
 	return out
 
+def __is_valid__(Board):
+	return not (Win(1, Board) and Win(-1, Board))
 
 def InitBoard (Board, vals):
 	#-------------------------------------------------------------------------

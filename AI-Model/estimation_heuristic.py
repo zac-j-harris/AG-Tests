@@ -43,7 +43,7 @@ def get_util_old(init_MoveList):
 
 
 # min_MonteCarlo_trials = 5000 # 1000
-max_MonteCarlo_trials = 5000 # 1000
+max_MonteCarlo_trials = 500 # 1000
 # run_MonteCarlo_sims = True
 MaxDepth = 30 # if run_MonteCarlo_sims else 2 # goes by 2, so 5 is actually a search depth of 10
 # num_playthroughs = 1

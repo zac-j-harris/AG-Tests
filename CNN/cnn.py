@@ -4,7 +4,7 @@ import os, csv, pickle, lzma
 from keras import Sequential
 from keras.layers import Dense, Conv2D, MaxPool2D, Flatten
 
-# data_fname = '~/Datasets/mnist'
+data_fname = '~/Datasets/mnist'
 datasets = ['mnist_train', 'mnist_test']
 
 def save_dat_compressed(data_out, fname):

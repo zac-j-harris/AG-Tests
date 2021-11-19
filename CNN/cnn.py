@@ -106,14 +106,14 @@ def main():
 	# y_train, y_test = y[0], y[1]
 
 	(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+	assert x_train.shape == (60000, 28, 28)
+	assert x_test.shape == (10000, 28, 28)
+	assert y_train.shape == (60000,)
+	assert y_test.shape == (10000,)
 	x_train = np.reshape(x_train, (60000, 28, 28, 1))
 	x_test = np.reshape(x_test, (60000, 28, 28, 1))
 	y_train = np.asarray(tf.keras.utils.to_categorical(y_train, 10))
 	y_test = np.asarray(tf.keras.utils.to_categorical(y_test, 10))
-	assert x_train.shape == (60000, 28, 28, 1)
-	assert x_test.shape == (10000, 28, 28, 1)
-	assert y_train.shape == (60000, 10)
-	assert y_test.shape == (10000, 10)
 
 	model = build_model()
 

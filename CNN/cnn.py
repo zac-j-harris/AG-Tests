@@ -1,8 +1,8 @@
-from tensorflow import keras
+import tensorflow as tf
 import numpy as np
 import os, csv, pickle, lzma
-from keras import Sequential
-from keras.layers import Dense, Conv2D, MaxPool2D, Flatten
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten
 
 data_fname = '~/Datasets/mnist'
 datasets = ['mnist_train', 'mnist_test']
@@ -54,7 +54,7 @@ def gather_data(scale_subset=1):
 		x[i], y[i] = zip(*t)
 
 		y[i] = y[i][:l]
-		y[i] = np.asarray(keras.utils.to_categorical(y[i], 10))
+		y[i] = np.asarray(tf.keras.utils.to_categorical(y[i], 10))
 		print(y[i].shape)
 
 		x[i] = np.reshape(x[i][:l], (l, 28, 28, 1))
@@ -105,7 +105,7 @@ def main():
 	# x_train, x_test = x[0], x[1]
 	# y_train, y_test = y[0], y[1]
 
-	(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+	(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 	assert x_train.shape == (60000, 28, 28)
 	assert x_test.shape == (10000, 28, 28)
 	assert y_train.shape == (60000,)
@@ -119,7 +119,7 @@ def main():
 
 	model.save('cnn_model')
 
-	# model = keras.models.load_model('path/to/location')
+	# model = tensorflow.keras.models.load_model('path/to/location')
 
 
 if __name__=='__main__':

@@ -108,8 +108,8 @@ def main():
 	x_test = np.reshape(x_test, (10000, 28, 28, 1))
 	y_train = np.asarray(tf.keras.utils.to_categorical(y_train, 10))
 	y_test = np.asarray(tf.keras.utils.to_categorical(y_test, 10))
-	x_train /= 255.0
-	x_test /= 255.0
+	x_train = x_train / 255.0
+	x_test = x_test / 255.0
 	model = build_model()
 
 	# training the model for 10 epochs

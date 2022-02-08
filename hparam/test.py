@@ -50,7 +50,7 @@ def main():
 
 	searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
 	param_distributions=grid, scoring="accuracy")
-	searchResults = searcher.fit(trainData, trainLabels)
+	searchResults = searcher.fit(x_train, y_train)
 
 	# initialize a random search with a 3-fold cross-validation and then
 	# start the hyperparameter search process

@@ -7,7 +7,7 @@ from tensorflow.keras import datasets
 def get_fit_model(h_params=None):
 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
 	# Feed the image classifier with training data.
-	clf.fit(x_train, y_train, epochs=10)
+	clf.fit(x_train, y_train, epochs=1)
 	return clf
 
 
@@ -32,14 +32,14 @@ def main():
 	batchSize = [4, 8, 16, 32, 64]
 	objectives = ['val_accuracy', 'val_loss']
 	loss = ['categorical_crossentropy']
-	max_trials = [i*10 for i in range(1, 11)]
+	max_trials = [i*10 for i in range(1, 21)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
 
 	# h_params = {'objective': objectives, 'tuner': tuners, 'loss': loss, 'max_trials': max_trials}
 	# create a dictionary from the hyperparameter grid
 	model = get_fit_model()
-	test_model(model)
-	quit()
+	# test_model(model)
+	# quit()
 
 	grid = dict(
 		objective=objectives,

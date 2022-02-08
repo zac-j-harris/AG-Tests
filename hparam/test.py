@@ -32,7 +32,7 @@ def main():
 	batchSize = [4, 8, 16, 32, 64]
 	objectives = ['val_accuracy', 'val_loss']
 	loss = ['categorical_crossentropy']
-	max_trials = [i*10 for i in range(1, 21)]
+	max_trials = [1]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
 
 	# h_params = {'objective': objectives, 'tuner': tuners, 'loss': loss, 'max_trials': max_trials}

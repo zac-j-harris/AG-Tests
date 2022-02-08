@@ -1,7 +1,7 @@
 # from skopt import BayesSearchCV
 import autokeras as ak
 from tensorflow.keras import datasets
-# from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 
 
 def get_fit_model(h_params=None):

@@ -69,7 +69,7 @@ def main():
 	# extract the best model, make predictions on our data, and show a classification report
 	print("[INFO] evaluating the best model...")
 	bestModel = searchResults.best_estimator_
-	accuracy = bestModel.score(testData, testLabels)
+	accuracy = bestModel.score(x_test, y_test)
 	print("accuracy: {:.2f}%".format(accuracy * 100))
 
 

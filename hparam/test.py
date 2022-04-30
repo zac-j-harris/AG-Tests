@@ -6,7 +6,7 @@ from tensorflow.keras import datasets
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
-EPOCHS = 100
+EPOCHS = 1
 
 
 def get_fit_model(x_train, y_train, h_params=None):
@@ -20,14 +20,11 @@ def test_model(clf):
 	predicted_y = clf.predict(x_test)
 	print(predicted_y)
 
-
 	# Evaluate the best model with testing data.
 	print(clf.evaluate(x_test, y_test))
 
 
-def get_model():
-	model = ak.ImageClassifier(overwrite=True, max_trials=1)
-	return model
+
 
 def main(x_train, y_train):
 	'''
@@ -38,7 +35,7 @@ def main(x_train, y_train):
 	batchSize = [4, 8, 16, 32, 64]
 	objectives = ['val_accuracy', 'val_loss']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
-	max_trials = [1, 2]
+	max_trials = [2**i for i in range(6)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
 
 	# h_params = {'objective': objectives, 'tuner': tuners, 'loss': loss, 'max_trials': max_trials}
@@ -101,9 +98,9 @@ def main(x_train, y_train):
 def run_base(x_train, y_train, x_test, y_test):
 	model = ak.ImageClassifier(overwrite=True, max_trials=1)
 	model.fit(x_train, y_train, epochs=EPOCHS)
-	predicted_y = clf.predict(x_test)
+	predicted_y = model.predict(x_test)
 	print(predicted_y)
-	print(clf.evaluate(x_test, y_test))
+	print(model.evaluate(x_test, y_test))
 
 
 if __name__ == "__main__":

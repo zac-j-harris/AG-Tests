@@ -48,12 +48,12 @@ def main(x_train, y_train):
 	# quit()
 	# model = KerasClassifier(build_fn=get_model, verbose=1)
 
-	grid = dict(
-		'objective'=objectives,
-		'tuner'=tuners,
-		'loss'=loss,
-		'max_trials'=max_trials
-	)
+	# grid = dict(
+	# 	'objective'=objectives,
+	# 	'tuner'=tuners,
+	# 	'loss'=loss,
+	# 	'max_trials'=max_trials
+	# )
 
 	# learnRate = [1e-2, 1e-3, 1e-4]
 	# epochs = [10, 20, 30, 40]
@@ -72,29 +72,29 @@ def main(x_train, y_train):
 	# 	param_grid=param_grid,
 	# )
 
-	searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
-	param_distributions=grid, scoring="accuracy")
-	searchResults = searcher.fit(x_train, y_train)
+	# searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
+	# param_distributions=grid, scoring="accuracy")
+	# searchResults = searcher.fit(x_train, y_train)
 
-	# initialize a random search with a 3-fold cross-validation and then
-	# start the hyperparameter search process
-	print("[INFO] performing random search...")
-	searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
-		param_distributions=grid, scoring="accuracy")
-	searchResults = searcher.fit(x_train, y_train)
+	# # initialize a random search with a 3-fold cross-validation and then
+	# # start the hyperparameter search process
+	# print("[INFO] performing random search...")
+	# searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
+	# 	param_distributions=grid, scoring="accuracy")
+	# searchResults = searcher.fit(x_train, y_train)
 	
-	# summarize grid search information
-	bestScore = searchResults.best_score_
-	bestParams = searchResults.best_params_
-	print("[INFO] best score is {:.2f} using {}".format(bestScore,
-		bestParams))
+	# # summarize grid search information
+	# bestScore = searchResults.best_score_
+	# bestParams = searchResults.best_params_
+	# print("[INFO] best score is {:.2f} using {}".format(bestScore,
+	# 	bestParams))
 
 
-	# extract the best model, make predictions on our data, and show a classification report
-	print("[INFO] evaluating the best model...")
-	bestModel = searchResults.best_estimator_
-	accuracy = bestModel.score(x_test, y_test)
-	print("accuracy: {:.2f}%".format(accuracy * 100))
+	# # extract the best model, make predictions on our data, and show a classification report
+	# print("[INFO] evaluating the best model...")
+	# bestModel = searchResults.best_estimator_
+	# accuracy = bestModel.score(x_test, y_test)
+	# print("accuracy: {:.2f}%".format(accuracy * 100))
 
 
 

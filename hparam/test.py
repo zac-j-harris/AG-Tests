@@ -6,27 +6,35 @@ from tensorflow.keras import datasets
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
-EPOCHS = 1
+EPOCHS = 100
 
 
-def get_fit_model(x_train, y_train, h_params=None):
-	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
-	clf.fit(x_train, y_train, epochs=EPOCHS)
-	return clf
+# def get_fit_model(x_train, y_train, h_params=None):
+# 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
+# 	clf.fit(x_train, y_train, epochs=EPOCHS)
+# 	return clf
 
 
-def test_model(clf):
-	# Predict with the best model.
-	predicted_y = clf.predict(x_test)
-	print(predicted_y)
+# def test_model(clf):
+# 	predicted_y = clf.predict(x_test)
+# 	print(predicted_y)
 
-	# Evaluate the best model with testing data.
-	print(clf.evaluate(x_test, y_test))
-
+# 	# Evaluate the best model with testing data.
+# 	print(clf.evaluate(x_test, y_test))
 
 
+def minimizable_func(hparams):
+	# (x_train, y_train), (x_test, y_test) = data
+	objective, loss, tuner, epochs = hparams
 
-def main(x_train, y_train):
+	clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1)
+	clf.fit(x_train, y_train, epochs=int(epochs))
+	# clf.export_model()
+	return 1-clf.evaluate(x_test, y_test)[1]
+
+
+
+def main():
 	'''
 	Objectives: val_accuracy, val_loss, https://faroit.com/keras-docs/1.2.2/objectives/#available-objectives
 	Loss: keras loss function
@@ -35,8 +43,19 @@ def main(x_train, y_train):
 	batchSize = [4, 8, 16, 32, 64]
 	objectives = ['val_accuracy', 'val_loss']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
-	max_trials = [2**i for i in range(6)]
+	# max_trials = [2**i for i in range(6)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
+
+	epochs = [1, 200]
+
+	dims = [objectives, loss, tuners, epochs]
+
+	ret = skopt.gp_minimize(minimizable_func, x0=[objectives[0], loss[0], tuners[0], 10], dimensions=dims)
+	print(ret.x)
+	print(ret.fun)
+
+
+
 
 	# h_params = {'objective': objectives, 'tuner': tuners, 'loss': loss, 'max_trials': max_trials}
 	# create a dictionary from the hyperparameter grid
@@ -95,7 +114,7 @@ def main(x_train, y_train):
 
 
 
-def run_base(x_train, y_train, x_test, y_test):
+def run_base():
 	model = ak.ImageClassifier(overwrite=True, max_trials=1)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
@@ -107,6 +126,6 @@ if __name__ == "__main__":
 	# Gather data
 	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 
-	# main(x_train, y_train)
-	run_base(x_train, y_train, x_test, y_test)
+	main()
+	# run_base()
 

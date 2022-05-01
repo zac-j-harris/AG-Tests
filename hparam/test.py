@@ -2,7 +2,7 @@
 import autokeras as ak
 from tensorflow.keras import datasets
 # from sklearn.model_selection import RandomizedSearchCV
-# from skopt import gp_minimize
+from skopt import gp_minimize
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 

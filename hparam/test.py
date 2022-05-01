@@ -32,7 +32,7 @@ def minimizable_func(hparams):
 	tuner = hparams[2]
 	epochs = hparams[3]
 	# objective, loss, tuner, epochs = hparams
-	tf.debugging.set_log_device_placement(True)
+	# tf.debugging.set_log_device_placement(True)
 	gpus = tf.config.list_logical_devices('GPU')
 	strategy = tf.distribute.MirroredStrategy(gpus)
 	with strategy.scope():

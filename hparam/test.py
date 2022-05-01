@@ -9,7 +9,7 @@ import skopt
 
 
 EPOCHS = 100
-
+GPUS = tf.config.list_logical_devices('GPU')
 
 # def get_fit_model(x_train, y_train, h_params=None):
 # 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
@@ -33,11 +33,10 @@ def minimizable_func(hparams):
 	epochs = hparams[3]
 	# objective, loss, tuner, epochs = hparams
 	# tf.debugging.set_log_device_placement(True)
-	gpus = tf.config.list_logical_devices('GPU')
-	strategy = tf.distribute.MirroredStrategy(gpus)
-	with strategy.scope():
-		clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1)
-		clf.fit(x_train, y_train, epochs=int(epochs))
+	# strategy = tf.distribute.MirroredStrategy(gpus)
+	# with strategy.scope():
+	clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+	clf.fit(x_train, y_train, epochs=int(epochs))
 	# clf.export_model()
 	return 1-clf.evaluate(x_test, y_test)[1]
 

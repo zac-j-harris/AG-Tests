@@ -27,16 +27,16 @@ GPUS = tf.config.list_logical_devices('GPU')
 
 def minimizable_func(hparams):
 	# (x_train, y_train), (x_test, y_test) = data
-	objective = hparams[0]
-	loss = hparams[1]
-	tuner = hparams[2]
-	epochs = hparams[3]
+	# objective = hparams[0]
+	loss = hparams[0]
+	tuner = hparams[1]
+	# epochs = hparams[2]
 	# objective, loss, tuner, epochs = hparams
 	# tf.debugging.set_log_device_placement(True)
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
-	clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-	clf.fit(train_data, epochs=int(epochs))
+	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+	clf.fit(train_data, epochs=int(50))
 	# clf.export_model()
 	# return 1-clf.evaluate(x_test, y_test)[1]
 	return 1-clf.evaluate(val_data)[1]
@@ -50,16 +50,16 @@ def main():
 	Tuners: greedy', 'bayesian', 'hyperband' or 'random'
 	'''
 	batchSize = [4, 8, 16, 32, 64]
-	objectives = ['val_accuracy', 'val_loss']
+	# objectives = ['val_accuracy']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	# max_trials = [2**i for i in range(6)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
 
-	epochs = [1, 200]
+	# epochs = [1, 200]
 
-	dims = [objectives, loss, tuners, epochs]
+	dims = [loss, tuners]
 
-	ret = skopt.gp_minimize(minimizable_func, x0=[objectives[0], loss[0], tuners[0], 10], dimensions=dims)
+	ret = skopt.gp_minimize(minimizable_func, x0=[loss[0], tuners[0]], dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
 

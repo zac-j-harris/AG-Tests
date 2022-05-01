@@ -130,6 +130,6 @@ if __name__ == "__main__":
 	# Gather data
 	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 
-	main()
-	# run_base()
+	# main()
+	run_base()
 

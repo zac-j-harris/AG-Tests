@@ -141,14 +141,15 @@ if __name__ == "__main__":
 
 	# The batch size must now be set on the Dataset objects.
 	batch_size = 32
-	train_data = train_data.batch(batch_size)
+	x_train = x_train.batch(batch_size)
+	y_train = y_train.batch(batch_size)
 	# val_data = val_data.batch(batch_size)
 
 	# Disable AutoShard.
 	options = tf.data.Options()
 	options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
-	x_train = train_data.with_options(options)
-	y_train = train_data.with_options(options)
+	x_train = x_train.with_options(options)
+	y_train = y_train.with_options(options)
 
 	main()
 	# run_base()

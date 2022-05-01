@@ -1,6 +1,7 @@
 # from skopt import BayesSearchCV
 import autokeras as ak
 from tensorflow.keras import datasets
+import tensorflow as tf
 # from sklearn.model_selection import RandomizedSearchCV
 # from skopt import gp_minimize
 import skopt
@@ -31,9 +32,12 @@ def minimizable_func(hparams):
 	tuner = hparams[2]
 	epochs = hparams[3]
 	# objective, loss, tuner, epochs = hparams
-
-	clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1)
-	clf.fit(x_train, y_train, epochs=int(epochs))
+	tf.debugging.set_log_device_placement(True)
+	gpus = tf.config.list_logical_devices('GPU')
+	strategy = tf.distribute.MirroredStrategy(gpus)
+	with strategy.scope():
+		clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1)
+		clf.fit(x_train, y_train, epochs=int(epochs))
 	# clf.export_model()
 	return 1-clf.evaluate(x_test, y_test)[1]
 

@@ -25,7 +25,11 @@ EPOCHS = 100
 
 def minimizable_func(hparams):
 	# (x_train, y_train), (x_test, y_test) = data
-	objective, loss, tuner, epochs = hparams
+	objective = hparams[0]
+	loss = hparams[1]
+	tuner = hparams[2]
+	epochs = hparams[3]
+	# objective, loss, tuner, epochs = hparams
 
 	clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1)
 	clf.fit(x_train, y_train, epochs=int(epochs))

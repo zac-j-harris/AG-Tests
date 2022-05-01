@@ -38,7 +38,8 @@ def minimizable_func(hparams):
 	clf = ak.ImageClassifier(objective=objective, loss=loss, tuner=tuner, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
 	clf.fit(train_data, epochs=int(epochs))
 	# clf.export_model()
-	return 1-clf.evaluate(x_test, y_test)[1]
+	# return 1-clf.evaluate(x_test, y_test)[1]
+	return 1-clf.evaluate(val_data)[1]
 
 
 
@@ -137,19 +138,19 @@ if __name__ == "__main__":
 	# Wrap data in Dataset objects.
 	train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 	# y_train = tf.data.Dataset.from_tensor_slices(y_train)
-	# val_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+	val_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 	# The batch size must now be set on the Dataset objects.
 	batch_size = 32
 	train_data = train_data.batch(batch_size)
 	# y_train = y_train.batch(batch_size)
-	# val_data = val_data.batch(batch_size)
+	val_data = val_data.batch(batch_size)
 
 	# Disable AutoShard.
 	options = tf.data.Options()
 	options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
 	train_data = train_data.with_options(options)
-	# y_train = y_train.with_options(options)
+	val_data = val_data.with_options(options)
 
 	main()
 	# run_base()

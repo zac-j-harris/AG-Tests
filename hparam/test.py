@@ -40,7 +40,7 @@ def set_proj_name():
 EPOCHS = None
 MAIN = True
 SEED = 67 # 17
-overwrite_num = 3
+overwrite_num = None
 overwrite_check = False
 # SEED = int(random.random() * 100.0)
 # print(SEED)

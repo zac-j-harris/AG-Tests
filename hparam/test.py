@@ -8,7 +8,7 @@ import skopt
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
-EPOCHS = 100
+EPOCHS = None
 GPUS = tf.config.list_logical_devices('GPU')
 
 # def get_fit_model(x_train, y_train, h_params=None):

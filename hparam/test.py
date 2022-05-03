@@ -68,9 +68,9 @@ def minimizable_func(hparams):
 	tuner = hparams[1]
 	# epochs = hparams[2]
 	# objective, loss, tuner, epochs = hparams
-	if overwrite_check:
+	if (not (overwrite_num is None)) and (not overwrite_check):
 		overwrite = False
-		overwrite_check = False
+		overwrite_check = True
 	else:
 		overwrite = True
 	# tf.debugging.set_log_device_placement(True)
@@ -179,9 +179,9 @@ def run_base():
 	global project_name, overwrite_check
 	set_proj_name()
 	# model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
-	if overwrite_check:
+	if (not (overwrite_num is None)) and (not overwrite_check):
 		overwrite = False
-		overwrite_check = False
+		overwrite_check = True
 	else:
 		overwrite = True
 	model = ak.ImageClassifier(objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)

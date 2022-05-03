@@ -35,7 +35,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = True
+MAIN = False
 SEED = 67 # 17
 # SEED = int(random.random() * 100.0)
 # print(SEED)
@@ -72,7 +72,10 @@ def minimizable_func(hparams):
 	clf.fit(train_data, epochs=None)
 	# clf.export_model()
 	# return 1-clf.evaluate(x_test, y_test)[1]
-	out = 1.0-clf.evaluate(val_data)[1]
+	model_eval = clf.evaluate(val_data)
+	out = 1.0-model_eval[1]
+	print('Metrics: ', clf.metrics_names)
+	print('Eval output: ', model_eval)
 	print('1-accuracy: ', out)
 	clear_session()
 	return out
@@ -165,8 +168,10 @@ def run_base():
 	model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
-	print(predicted_y)
-	print(model.evaluate(x_test, y_test))
+	# print(predicted_y)
+	model_eval = model.evaluate(x_test, y_test)
+	print('Metrics: ', model.metrics_names)
+	print('Eval output: ', model_eval)
 
 
 

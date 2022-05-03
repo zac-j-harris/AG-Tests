@@ -67,7 +67,7 @@ def minimizable_func(hparams):
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
 	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-	clf.fit(train_data, epochs=int(50))
+	clf.fit(train_data, epochs=None)
 	# clf.export_model()
 	# return 1-clf.evaluate(x_test, y_test)[1]
 	out = 1.0-clf.evaluate(val_data)[1]

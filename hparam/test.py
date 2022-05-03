@@ -22,21 +22,27 @@ MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
 project_name = 'image_classifier'
 
 def set_proj_name():
-	global project_name
-	project_name = 'image_classifier_'
-	i = 0
-	dir_files = os.listdir(MY_DIR)
-	while project_name + str(i) in dir_files:
-		i += 1
-	project_name = project_name + str(i)
-	os.system("mkdir " + MY_DIR + project_name)
+	global project_name, overwrite_check
+	if (not (overwrite_num is None)) and (not overwrite_check):
+		project_name = 'image_classifier_' + str(overwrite_num)
+		overwrite_check = True
+	else:
+		project_name = 'image_classifier_'
+		i = 0
+		dir_files = os.listdir(MY_DIR)
+		while project_name + str(i) in dir_files:
+			i += 1
+		project_name = project_name + str(i)
+		os.system("mkdir " + MY_DIR + project_name)
 
 '''
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 SEED = 67 # 17
+overwrite_num = 3
+overwrite_check = False
 # SEED = int(random.random() * 100.0)
 # print(SEED)
 
@@ -66,17 +72,20 @@ def minimizable_func(hparams):
 	# tf.debugging.set_log_device_placement(True)
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
+	try:
 	# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1)
-	# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, overwrite=True, max_trials=1)
-	clf.fit(train_data, epochs=None)
-	# clf.export_model()
-	# return 1-clf.evaluate(x_test, y_test)[1]
-	model_eval = clf.evaluate(val_data)
-	out = 1.0-model_eval[1]
-	print('Metrics: ', clf.metrics_names)
-	print('Eval output: ', model_eval)
-	print('1-accuracy: ', out)
+		clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1)
+		# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, overwrite=True, max_trials=1)
+		clf.fit(train_data, epochs=None)
+		# clf.export_model()
+		# return 1-clf.evaluate(x_test, y_test)[1]
+		model_eval = clf.evaluate(val_data)
+		out = 1.0-model_eval[1]
+		print('Metrics: ', clf.metrics_names)
+		print('Eval output: ', model_eval)
+		print('1-accuracy: ', out)
+	except:
+		out = 1.0
 	clear_session()
 	return out
 

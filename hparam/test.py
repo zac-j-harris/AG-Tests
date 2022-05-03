@@ -165,7 +165,8 @@ def main():
 def run_base():
 	global project_name
 	set_proj_name()
-	model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	# model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	model = ak.ImageClassifier(objective='val_accuracy', overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)

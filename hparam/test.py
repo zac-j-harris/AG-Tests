@@ -32,7 +32,7 @@ project_name = project_name + str(i)
 '''
 EPOCHS = None
 MAIN = False
-SEED = int(random.random * 100.0)
+SEED = int(random.random() * 100.0)
 print(SEED)
 
 # def get_fit_model(x_train, y_train, h_params=None):

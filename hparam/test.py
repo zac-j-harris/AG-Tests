@@ -23,13 +23,13 @@ project_name = 'image_classifier'
 
 def set_proj_name():
 	global project_name
-
 	project_name = 'image_classifier_'
 	i = 0
 	dir_files = os.listdir(MY_DIR)
 	while project_name + str(i) in dir_files:
 		i += 1
 	project_name = project_name + str(i)
+	os.system("mkdir " + MY_DIR + project_name)
 
 '''
 	Setup project defaults

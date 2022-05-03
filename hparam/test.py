@@ -6,10 +6,19 @@ import tensorflow as tf
 # from skopt import gp_minimize
 import skopt
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
-
+from tensorflow.keras.backend import clear_session
+import os
 
 EPOCHS = None
 GPUS = tf.config.list_logical_devices('GPU')
+
+MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
+project_name = 'prior_runs/image_classifier_'
+i = 0
+dir_files = os.listdir(MY_DIR)
+while project_name + str(i) in dir_files:
+	i += 1
+project_name = project_name + str(i)
 
 # def get_fit_model(x_train, y_train, h_params=None):
 # 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
@@ -35,11 +44,13 @@ def minimizable_func(hparams):
 	# tf.debugging.set_log_device_placement(True)
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
-	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, project_name=project_name, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
 	clf.fit(train_data, epochs=int(50))
 	# clf.export_model()
 	# return 1-clf.evaluate(x_test, y_test)[1]
-	return 1-clf.evaluate(val_data)[1]
+	out = 1.0-clf.evaluate(val_data)[1]
+	clear_session()
+	return out
 
 
 

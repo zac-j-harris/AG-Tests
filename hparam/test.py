@@ -19,7 +19,7 @@ GPUS = tf.config.list_logical_devices('GPU')
 	Setup Project Name
 '''
 MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
-project_name = ''
+project_name = 'image_classifier'
 
 def set_proj_name():
 	global project_name
@@ -66,11 +66,14 @@ def minimizable_func(hparams):
 	# tf.debugging.set_log_device_placement(True)
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
-	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+	# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+	clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1)
+	# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, overwrite=True, max_trials=1)
 	clf.fit(train_data, epochs=None)
 	# clf.export_model()
 	# return 1-clf.evaluate(x_test, y_test)[1]
 	out = 1.0-clf.evaluate(val_data)[1]
+	print('1-accuracy: ', out)
 	clear_session()
 	return out
 
@@ -180,16 +183,16 @@ if __name__ == "__main__":
 		val_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 		# The batch size must now be set on the Dataset objects.
-		batch_size = 32
-		train_data = train_data.batch(batch_size)
-		# y_train = y_train.batch(batch_size)
-		val_data = val_data.batch(batch_size)
+		# batch_size = 256
+		# train_data = train_data.batch(batch_size)
+		# # y_train = y_train.batch(batch_size)
+		# val_data = val_data.batch(batch_size)
 
-		# Disable AutoShard.
-		options = tf.data.Options()
-		options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
-		train_data = train_data.with_options(options)
-		val_data = val_data.with_options(options)
+		# # Disable AutoShard.
+		# options = tf.data.Options()
+		# options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
+		# train_data = train_data.with_options(options)
+		# val_data = val_data.with_options(options)
 		
 		main()
 	

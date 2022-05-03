@@ -35,8 +35,8 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
-SEED = 17
+MAIN = True
+SEED = 67 # 17
 # SEED = int(random.random() * 100.0)
 # print(SEED)
 

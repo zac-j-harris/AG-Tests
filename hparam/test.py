@@ -19,12 +19,17 @@ GPUS = tf.config.list_logical_devices('GPU')
 	Setup Project Name
 '''
 MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
-project_name = 'image_classifier_'
-i = 0
-dir_files = os.listdir(MY_DIR)
-while project_name + str(i) in dir_files:
-	i += 1
-project_name = project_name + str(i)
+project_name = ''
+
+def set_proj_name():
+	global project_name
+
+	project_name = 'image_classifier_'
+	i = 0
+	dir_files = os.listdir(MY_DIR)
+	while project_name + str(i) in dir_files:
+		i += 1
+	project_name = project_name + str(i)
 
 '''
 	Setup project defaults
@@ -50,6 +55,8 @@ SEED = 17
 
 
 def minimizable_func(hparams):
+	global project_name
+	set_proj_name()
 	# (x_train, y_train), (x_test, y_test) = data
 	# objective = hparams[0]
 	loss = hparams[0]
@@ -150,6 +157,8 @@ def main():
 
 
 def run_base():
+	global project_name
+	set_proj_name()
 	model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
@@ -163,7 +172,7 @@ if __name__ == "__main__":
 	# Gather data
 	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 
-
+	set_proj_name()
 	if MAIN:
 		# Wrap data in Dataset objects.
 		train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))

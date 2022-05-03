@@ -25,15 +25,16 @@ dir_files = os.listdir(MY_DIR)
 while project_name + str(i) in dir_files:
 	i += 1
 project_name = project_name + str(i)
-
+os.system("mkdir " + project_name)
 
 '''
 	Setup project defaults
 '''
 EPOCHS = None
 MAIN = False
-SEED = int(random.random() * 100.0)
-print(SEED)
+SEED = 17
+# SEED = int(random.random() * 100.0)
+# print(SEED)
 
 # def get_fit_model(x_train, y_train, h_params=None):
 # 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)

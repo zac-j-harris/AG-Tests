@@ -22,10 +22,9 @@ MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
 project_name = 'image_classifier'
 
 def set_proj_name():
-	global project_name, overwrite_check
+	global project_name
 	if (not (overwrite_num is None)) and (not overwrite_check):
 		project_name = 'image_classifier_' + str(overwrite_num)
-		overwrite_check = True
 	else:
 		project_name = 'image_classifier_'
 		i = 0
@@ -61,7 +60,7 @@ overwrite_check = False
 
 
 def minimizable_func(hparams):
-	global project_name
+	global project_name, overwrite_check
 	set_proj_name()
 	# (x_train, y_train), (x_test, y_test) = data
 	# objective = hparams[0]
@@ -69,12 +68,17 @@ def minimizable_func(hparams):
 	tuner = hparams[1]
 	# epochs = hparams[2]
 	# objective, loss, tuner, epochs = hparams
+	if overwrite_check:
+		overwrite = False
+		overwrite_check = False
+	else:
+		overwrite = True
 	# tf.debugging.set_log_device_placement(True)
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
 	try:
 	# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-		clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1)
+		clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
 		# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, overwrite=True, max_trials=1)
 		clf.fit(train_data, epochs=None)
 		# clf.export_model()
@@ -172,10 +176,15 @@ def main():
 
 
 def run_base():
-	global project_name
+	global project_name, overwrite_check
 	set_proj_name()
 	# model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
-	model = ak.ImageClassifier(objective='val_accuracy', overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	if overwrite_check:
+		overwrite = False
+		overwrite_check = False
+	else:
+		overwrite = True
+	model = ak.ImageClassifier(objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)

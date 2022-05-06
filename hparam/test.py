@@ -259,7 +259,9 @@ def run_base():
 
 if __name__ == "__main__":
 	# Gather data
-	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data(label_mode='fine')  # 'fine' or 'coarse'
 
 	# set_proj_name()
 	if MAIN:

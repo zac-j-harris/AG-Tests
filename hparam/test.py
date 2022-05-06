@@ -18,7 +18,7 @@ GPUS = tf.config.list_logical_devices('GPU')
 '''
 	Setup Project Name
 '''
-MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
+MY_DIR = '/gscratch/zharris1/Workspace/prior_runs/'
 project_name = 'auto_model'
 
 def set_proj_name():
@@ -42,7 +42,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 # SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False
@@ -113,8 +113,8 @@ def minimizable_func(hparams):
 	try:
 		input_node, output_node = build_custom_search_space()
 		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
-		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
+		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
+		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
 		clf.fit(train_data, epochs=None)
 		# clf.export_model()
 		# return 1-clf.evaluate(x_test, y_test)[1]

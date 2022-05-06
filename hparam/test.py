@@ -19,15 +19,15 @@ GPUS = tf.config.list_logical_devices('GPU')
 	Setup Project Name
 '''
 MY_DIR = '/home/zharris1/Documents/Jobs/Workspace/prior_runs/'
-project_name = 'image_classifier'
+project_name = 'auto_model'
 
 def set_proj_name():
 	global project_name
 	# return
 	if (not (overwrite_num is None)) and (not overwrite_check):
-		project_name = 'image_classifier_' + str(overwrite_num)
+		project_name = 'auto_model_' + str(overwrite_num)
 	else:
-		project_name = 'image_classifier_'
+		project_name = 'auto_model_'
 		i = 0
 		dir_files = os.listdir(MY_DIR)
 		while project_name + str(i) in dir_files:

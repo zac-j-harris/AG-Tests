@@ -6,8 +6,8 @@ import tensorflow as tf
 # from skopt import gp_minimize
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from tensorflow.keras.backend import clear_session
-import os, random, skopt
-
+import os, random, skopt, time
+from threading import Thread
 
 '''
 	Setup Parallel Processing
@@ -23,6 +23,7 @@ project_name = 'image_classifier'
 
 def set_proj_name():
 	global project_name
+	# return
 	if (not (overwrite_num is None)) and (not overwrite_check):
 		project_name = 'image_classifier_' + str(overwrite_num)
 	else:
@@ -38,12 +39,12 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
-SEED = 67 # 17
+MAIN = True
+# SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False
-# SEED = int(random.random() * 100.0)
-# print(SEED)
+SEED = int(random.random() * 1000.0)
+print(SEED)
 
 # def get_fit_model(x_train, y_train, h_params=None):
 # 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
@@ -57,6 +58,35 @@ overwrite_check = False
 
 # 	# Evaluate the best model with testing data.
 # 	print(clf.evaluate(x_test, y_test))
+
+
+'''
+Thread Class
+'''
+class ThreadWithReturnValue(Thread):
+	def __init__(self, group=None, target=None, name=None,
+				 args=(), kwargs=None, *, daemon=None):
+		Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
+		self._return = None
+	def run(self):
+		try:
+			if self._target:
+				self._return = self._target(*self._args, **self._kwargs)
+		finally:
+			del self._target, self._args, self._kwargs
+	def join(self, timeout=None):
+		Thread.join(self, timeout=timeout)
+		return self._return
+
+
+def threaded_min_func(hparams):
+	thread = ThreadWithReturnValue(target=minimizable_func, args=(hparams,))
+	thread.daemon = True
+	thread.start()
+	while thread.is_alive():
+		time.sleep(5)
+	out = thread.join()
+	return out
 
 
 def minimizable_func(hparams):
@@ -77,9 +107,10 @@ def minimizable_func(hparams):
 	# strategy = tf.distribute.MirroredStrategy(gpus)
 	# with strategy.scope():
 	try:
-	# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-		clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
-		# clf = ak.ImageClassifier(objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, overwrite=True, max_trials=1)
+		input_node, output_node = build_custom_search_space()
+		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
+		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
 		clf.fit(train_data, epochs=None)
 		# clf.export_model()
 		# return 1-clf.evaluate(x_test, y_test)[1]
@@ -88,11 +119,25 @@ def minimizable_func(hparams):
 		print('Metrics: ', clf.metrics_names)
 		print('Eval output: ', model_eval)
 		print('1-accuracy: ', out)
-	except:
+	except Exception as e:
+		print(e)
 		out = 1.0
 	clear_session()
 	return out
 
+
+def build_custom_search_space():
+	input_node = ak.ImageInput()
+	output_node = ak.ImageBlock(
+		# Only search ResNet architectures.
+		block_type="vanilla",
+		# Normalize the dataset.
+		normalize=True,
+		# Do not do data augmentation.
+		augment=False,
+	)(input_node)
+	output_node = ak.ClassificationHead()(output_node)
+	return input_node, output_node
 
 
 def main():
@@ -106,12 +151,13 @@ def main():
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	# max_trials = [2**i for i in range(6)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
+	# learning_rate = (1e-4, 5.0)
 
 	# epochs = [1, 200]
 
 	dims = [loss, tuners]
 
-	ret = skopt.gp_minimize(minimizable_func, x0=[loss[0], tuners[0]], dimensions=dims)
+	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
 
@@ -184,7 +230,8 @@ def run_base():
 		overwrite_check = True
 	else:
 		overwrite = True
-	model = ak.ImageClassifier(objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	input_node, output_node = build_custom_search_space()
+	model = ak.ImageClassifier(inputs=input_node, outputs=output_node, objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)

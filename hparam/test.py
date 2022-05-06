@@ -249,6 +249,7 @@ def run_base():
 	model_eval = model.evaluate(x_test, y_test)
 	# print('Metrics: ', model.metrics_names)
 	print('Eval output: ', model_eval)
+	print('Val Accuracy: ', model_eval[1])
 
 
 

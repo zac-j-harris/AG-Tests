@@ -42,7 +42,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 # SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False

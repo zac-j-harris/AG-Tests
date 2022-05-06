@@ -43,7 +43,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 # SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False
@@ -114,8 +114,8 @@ def minimizable_func(hparams):
 	try:
 		input_node, output_node = build_custom_search_space()
 		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
-		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
-		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
+		clf = ak.AutoModel(inputs=input_node, outputs=output_node, metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'], objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
+		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'], objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
 		clf.fit(train_data, epochs=None)
 		# clf.export_model()
 		# return 1-clf.evaluate(x_test, y_test)[1]
@@ -145,6 +145,7 @@ def build_custom_search_space():
 	# output_node = ak.ClassificationHead(metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'])(output_node)
 	output_node = ak.ClassificationHead()(output_node)
 	return input_node, output_node
+
 
 
 def main():
@@ -239,8 +240,8 @@ def run_base():
 	else:
 		overwrite = True
 	input_node, output_node = build_custom_search_space()
-	model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
-	# model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED)
+	model = ak.AutoModel(inputs=input_node, outputs=output_node, metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'], objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	# model = ak.AutoModel(inputs=input_node, outputs=output_node, metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'], objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)

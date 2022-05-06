@@ -121,7 +121,7 @@ def minimizable_func(hparams):
 		# return 1-clf.evaluate(x_test, y_test)[1]
 		model_eval = clf.evaluate(val_data)
 		out = model_eval[1]
-		print('Metrics: ', model_eval.metrics_names)
+		# print('Metrics: ', model_eval.metrics_names)
 		print('Eval output: ', model_eval)
 		print('Loss: ', out)
 	except Exception as e:
@@ -247,7 +247,7 @@ def run_base():
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)
 	model_eval = model.evaluate(x_test, y_test)
-	print('Metrics: ', model_eval.metrics_names)
+	# print('Metrics: ', model.metrics_names)
 	print('Eval output: ', model_eval)
 
 

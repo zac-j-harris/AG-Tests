@@ -8,6 +8,7 @@ import tensorflow as tf
 from tensorflow.keras.backend import clear_session
 import os, random, skopt, time
 from threading import Thread
+# from keras import metrics
 
 '''
 	Setup Parallel Processing
@@ -141,7 +142,8 @@ def build_custom_search_space():
 		# Do not do data augmentation.
 		augment=False,
 	)(input_node)
-	output_node = ak.ClassificationHead(metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'])(output_node)
+	# output_node = ak.ClassificationHead(metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'])(output_node)
+	output_node = ak.ClassificationHead()(output_node)
 	return input_node, output_node
 
 

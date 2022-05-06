@@ -24,16 +24,19 @@ project_name = 'auto_model'
 def set_proj_name():
 	global project_name
 	# return
-	if (not (overwrite_num is None)) and (not overwrite_check):
-		project_name = 'auto_model_' + str(overwrite_num)
-	else:
-		project_name = 'auto_model_'
-		i = 0
-		dir_files = os.listdir(MY_DIR)
-		while project_name + str(i) in dir_files:
-			i += 1
-		project_name = project_name + str(i)
-		os.system("mkdir " + MY_DIR + project_name)
+	try:
+		if (not (overwrite_num is None)) and (not overwrite_check):
+			project_name = 'auto_model_' + str(overwrite_num)
+		else:
+			project_name = 'auto_model_'
+			i = 0
+			dir_files = os.listdir(MY_DIR)
+			while project_name + str(i) in dir_files:
+				i += 1
+			project_name = project_name + str(i)
+			os.system("mkdir " + MY_DIR + project_name)
+	except:
+		project_name = 'auto_model'
 
 '''
 	Setup project defaults
@@ -45,6 +48,7 @@ overwrite_num = None
 overwrite_check = False
 SEED = int(random.random() * 1000.0)
 print(SEED)
+hparam_vals = []
 
 # def get_fit_model(x_train, y_train, h_params=None):
 # 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
@@ -90,7 +94,7 @@ def threaded_min_func(hparams):
 
 
 def minimizable_func(hparams):
-	global project_name, overwrite_check
+	global project_name, overwrite_check, hparam_vals
 	set_proj_name()
 	# (x_train, y_train), (x_test, y_test) = data
 	# objective = hparams[0]
@@ -123,6 +127,7 @@ def minimizable_func(hparams):
 		print(e)
 		out = 1.0
 	clear_session()
+	hparam_vals.append(out)
 	return out
 
 
@@ -160,6 +165,7 @@ def main():
 	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
+	print('hparam vals: ', hparam_vals)
 
 
 
@@ -231,7 +237,8 @@ def run_base():
 	else:
 		overwrite = True
 	input_node, output_node = build_custom_search_space()
-	model = ak.ImageClassifier(inputs=input_node, outputs=output_node, objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	# model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+	model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED)
 	model.fit(x_train, y_train, epochs=EPOCHS)
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)

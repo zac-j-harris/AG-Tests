@@ -43,7 +43,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 # SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False
@@ -120,10 +120,10 @@ def minimizable_func(hparams):
 		# clf.export_model()
 		# return 1-clf.evaluate(x_test, y_test)[1]
 		model_eval = clf.evaluate(val_data)
-		out = model_eval[1]
+		out = 1 - model_eval[1]
 		# print('Metrics: ', model_eval.metrics_names)
-		print('Eval output: ', model_eval)
-		print('Loss: ', out)
+		print('Validation (Loss, Acc): ', model_eval)
+		print('Output (1 - acc): ', out)
 	except Exception as e:
 		print(e)
 		out = 1.0

@@ -43,7 +43,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 # SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False
@@ -168,9 +168,14 @@ def main():
 
 	dims = [loss, tuners]
 
-	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
-	print(ret.x)
-	print(ret.fun)
+	# ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
+	# print(ret.x)
+	# print(ret.fun)
+	for loss_fun in loss:
+		for tuner in tuners:
+			hp = (loss_fun, tuner)
+			threaded_min_func(hp)
+
 	print('hparam vals: ', hparam_vals)
 
 

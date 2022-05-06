@@ -12,3 +12,4 @@ __pycache__/*
 *.pyc
 libraries/*
 hparam/image_classifier/*
+hparam/auto_model/*

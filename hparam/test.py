@@ -171,14 +171,15 @@ def main():
 	# ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
 	# print(ret.x)
 	# print(ret.fun)
-	# for loss_fun in loss:
-		# for tuner in tuners:
-			# hp = (loss_fun, tuner)
-			# threaded_min_func(hp)
-	hp = (loss[1], tuners[0])
-	for i in range(10):
-		threaded_min_func(hp)
-	print('hparam vals: ', hparam_vals)
+	for loss_fun in loss:
+		for tuner in tuners:
+			for _ in range(30):
+				hp = (loss_fun, tuner)
+				threaded_min_func(hp)
+	# hp = (loss[1], tuners[0])
+	# for i in range(10):
+		# threaded_min_func(hp)
+	# print('hparam vals: ', hparam_vals)
 
 
 
@@ -266,8 +267,8 @@ def run_base():
 
 if __name__ == "__main__":
 	# Gather data
-	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
+	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data(label_mode='fine')  # 'fine' or 'coarse'
 
 	# set_proj_name()

@@ -43,7 +43,7 @@ def set_proj_name():
 	Setup project defaults
 '''
 EPOCHS = None
-MAIN = False
+MAIN = True
 # SEED = 67 # 17
 overwrite_num = None
 overwrite_check = False
@@ -267,9 +267,9 @@ def run_base():
 
 if __name__ == "__main__":
 	# Gather data
-	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data(label_mode='fine')  # 'fine' or 'coarse'
-	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode glitches it
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode glitches it
 
 	# set_proj_name()
 	if MAIN:

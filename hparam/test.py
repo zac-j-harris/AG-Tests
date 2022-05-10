@@ -95,8 +95,10 @@ def threaded_min_func(hparams):
 
 
 def minimizable_func(hparams):
-	global project_name, overwrite_check, hparam_vals
+	global project_name, overwrite_check, hparam_vals, SEED
 	set_proj_name()
+	SEED = int(random.random() * 1000.0)
+	print(SEED)
 	# (x_train, y_train), (x_test, y_test) = data
 	# objective = hparams[0]
 	loss = hparams[0]
@@ -171,9 +173,9 @@ def main():
 	# ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
 	# print(ret.x)
 	# print(ret.fun)
-	for loss_fun in loss:
-		for tuner in tuners:
-			for _ in range(30):
+	for _ in range(30):
+		for loss_fun in loss:
+			for tuner in tuners:
 				hp = (loss_fun, tuner)
 				threaded_min_func(hp)
 	# hp = (loss[1], tuners[0])
@@ -267,9 +269,9 @@ def run_base():
 
 if __name__ == "__main__":
 	# Gather data
-	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data(label_mode='fine')  # 'fine' or 'coarse'
-	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode glitches it
+	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode glitches it
 
 	# set_proj_name()
 	if MAIN:

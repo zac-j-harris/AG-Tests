@@ -196,7 +196,8 @@ def minimizable_func(hparams):
 		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
 		
 		# Fit the model w/ set learning rate
-		clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate, optimizer=optimizer)])
+		clf.fit(train_data, epochs=None)
+		# clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate, optimizer=optimizer)])
 
 		# Evaluate the model
 		model_eval = clf.evaluate(val_data)
@@ -251,21 +252,23 @@ def main():
 	# objectives = ['val_accuracy']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
-	learning_rate = (1e-4, 5.0)
-	optimizers = ["SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "Ftrl"]
+	# learning_rate = (1e-4, 5.0)
+	# optimizers = ["SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "Ftrl"]
 
 
-	x0 = [loss[0], tuners[0], 5e-3, optimizers[2]]
-	dims = [loss, tuners, learning_rate, optimizers]
+	# x0 = [loss[0], tuners[0], 5e-3, optimizers[2]]
+	x0 = [loss[0], tuners[0]]
+	# dims = [loss, tuners, learning_rate, optimizers]
+	dims = [loss, tuners]
 
 	print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
 
 
 	# Bayesian HPO
-	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
-	print(ret.x)
-	print(ret.fun)
-	print('hparam vals: ', hparam_check_list)
+	# ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	# print(ret.x)
+	# print(ret.fun)
+	# print('hparam vals: ', hparam_check_list)
 
 	# Reset all known hparam configurations
 	reset_search_mem()

@@ -10,6 +10,7 @@ import os, random, skopt, time
 from threading import Thread
 # from keras import metrics
 from tensorflow.keras import callbacks
+import numpy as np
 
 '''
 	Setup Parallel Processing
@@ -205,7 +206,7 @@ def build_custom_search_space():
 		# Only search ResNet architectures.
 		block_type="vanilla",
 		# Normalize the dataset.
-		normalize=True,
+		normalize=False,
 		# Do not do data augmentation.
 		augment=False,
 	)(input_node)
@@ -272,25 +273,33 @@ def run_base():
 	# model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', overwrite=overwrite, max_trials=1, seed=SEED)
 	
 	# 
-	model.fit(x_train, y_train, epochs=EPOCHS)
+	model.fit(train_data, epochs=EPOCHS)
 	
 
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)
-	model_eval = model.evaluate(x_test, y_test)
+	model_eval = model.evaluate(val_data)
 	# print('Metrics: ', model.metrics_names)
 	print('Eval output: ', model_eval)
 	print('Val Accuracy: ', model_eval[1])
 
 
+def get_norm_data():
+	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
+
+	min_max_norm = lambda i, j: (i-np.min(j)) / (np.max(j)-np.min(j))
+	x_train = min_max_norm(x_train, x_train)
+	x_test = min_max_norm(x_test, x_train)
+	y_train = min_max_norm(y_train, y_train)
+	y_test = min_max_norm(y_test, y_train)
+	return (x_train, y_train), (x_test, y_test)
 
 
 if __name__ == "__main__":
 	# Gather data
-	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
+	(x_train, y_train), (x_test, y_test) = get_norm_data()
 
-	# set_proj_name()
 	if MAIN:
 		# Wrap data in Dataset objects.
 		train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))

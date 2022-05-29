@@ -24,10 +24,13 @@ MY_DIR = '/gscratch/zharris1/Workspace/prior_runs/'
 project_name = 'auto_model'
 
 def set_proj_name():
+	'''
+		Creates a custom project name after checking against currently used names.
+		Sets global variable project_name for use as model save filename
+	'''
 	global project_name
-	# return
 	try:
-		if (not (overwrite_num is None)) and (not overwrite_check):
+		if (not (overwrite_num is None)):
 			project_name = 'auto_model_' + str(overwrite_num)
 		else:
 			project_name = 'auto_model_'
@@ -45,31 +48,20 @@ def set_proj_name():
 '''
 EPOCHS = None
 MAIN = True
-# SEED = 67 # 17
-overwrite_num = None
-overwrite_check = False
+
+overwrite_num = None		# Which prior AK model to overwrite, None if create new model save file
+
 SEED = int(random.random() * 1000.0)
 print('Seed:', SEED)
+
 hparam_vals = {}
 
-# def get_fit_model(x_train, y_train, h_params=None):
-# 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
-# 	clf.fit(x_train, y_train, epochs=EPOCHS)
-# 	return clf
 
 
-# def test_model(clf):
-# 	predicted_y = clf.predict(x_test)
-# 	print(predicted_y)
-
-# 	# Evaluate the best model with testing data.
-# 	print(clf.evaluate(x_test, y_test))
-
-
-'''
-Thread Class
-'''
 class ThreadWithReturnValue(Thread):
+	'''
+		Thread Class that returns value from internal function
+	'''
 	def __init__(self, group=None, target=None, name=None,
 				 args=(), kwargs=None, *, daemon=None):
 		Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
@@ -84,10 +76,11 @@ class ThreadWithReturnValue(Thread):
 		Thread.join(self, timeout=timeout)
 		return self._return
 
-'''
-Callback H-Param modifier class
-'''
+
 class HPO_Callback(callbacks.Callback):
+	'''
+		Callback H-Param modifier class
+	'''
 	def __init__(self, lr):
 		super(HPO_Callback, self).__init__()
 		self.lr = lr
@@ -106,6 +99,9 @@ class HPO_Callback(callbacks.Callback):
 
 
 def threaded_min_func(hparams):
+	'''
+		Function to internalize each AutoKeras run into a process.
+	'''
 	thread = ThreadWithReturnValue(target=minimizable_func, args=(hparams,))
 	thread.daemon = True
 	thread.start()
@@ -115,56 +111,80 @@ def threaded_min_func(hparams):
 	return out
 
 
-def minimizable_func(hparams):
-	global project_name, overwrite_check, hparam_vals, SEED
-	set_proj_name()
-
-	if not (hparam_vals == {}):
-		if tuple(hparams) in hparam_vals.keys():
-			return hparam_vals[tuple(hparams)]
-
-	# (x_train, y_train), (x_test, y_test) = data
-	# objective = hparams[0]
-	
-	loss = hparams[0]
-	tuner = hparams[1]
-	learning_rate=hparams[2]
-	# epochs = hparams[2]
-	# objective, loss, tuner, epochs = hparams
-	if (not (overwrite_num is None)) and (not overwrite_check):
-		overwrite = False
-		overwrite_check = True
-	else:
-		overwrite = True
-	
-	# tf.debugging.set_log_device_placement(True)
-	try:
-		input_node, output_node = build_custom_search_space()
-		
-		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
-		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
-		
-		clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate)])
-
-		model_eval = clf.evaluate(val_data)
-
-		if type(model_eval) == list:
+def log_output(model_eval):
+	'''
+		Function to log the output after each AK run.
+	'''
+	if type(model_eval) == list:
 			out = 1 - model_eval[1]
 			print('Validation (Loss, Acc): ', model_eval)
 			print('Output (1 - acc): ', out)
 		else:
 			out = model_eval
 			print('Validation Loss: ', model_eval)
+	return out
+
+
+def minimizable_func(hparams):
+	'''
+		Function defining a single AK training and evaluation run.
+	'''
+	global project_name, hparam_vals, SEED
+
+	set_proj_name()
+
+	# Check for reuse of hparam configuration. If reused, return prior value.
+	if not (hparam_vals == {}):
+		if tuple(hparams) in hparam_vals.keys():
+			return hparam_vals[tuple(hparams)]
+	
+	# Separate out the hyperparameters
+	loss = hparams[0]
+	tuner = hparams[1]
+	learning_rate=hparams[2]
+
+	# Code dealing with AutoModel reuse or new model creation
+	if (not (overwrite_num is None)):
+		overwrite = False
+	else:
+		overwrite = True
+	
+	# tf.debugging.set_log_device_placement(True)
+	try:
+		# Build a custom vanilla CNN model
+		input_node, output_node = build_custom_search_space()
+		
+		# Server AutoModel creation
+		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
+		
+		# Local AutoModel creation
+		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
+		
+		# Fit the model w/ set learning rate
+		clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate)])
+
+		# Evaluate the model
+		model_eval = clf.evaluate(val_data)
+
+		# Get and log the model evaluation loss
+		out = log_output(model_eval)
 	except Exception as e:
 		print(e)
 		out = 1.0
+
+	# Clear TF session (just in case it helps to clear CUDA GPU memory)
 	clear_session()
 	
+	# Store known hparam configuration worth
 	hparam_vals[tuple(hparams)] = (out)
+
 	return out
 
 
 def build_custom_search_space():
+	'''
+		Function that creates and returns a custom Image Classifier model for AutoKeras
+	'''
 	input_node = ak.ImageInput()
 	output_node = ak.ImageBlock(
 		# Only search ResNet architectures.
@@ -182,14 +202,15 @@ def build_custom_search_space():
 
 def main():
 	'''
-	Objectives: val_accuracy, val_loss, https://faroit.com/keras-docs/1.2.2/objectives/#available-objectives
-	Loss: keras loss function
-	Tuners: greedy', 'bayesian', 'hyperband' or 'random'
+		Objectives: val_accuracy, val_loss, https://faroit.com/keras-docs/1.2.2/objectives/#available-objectives
+		Loss: keras loss function
+		Tuners: greedy', 'bayesian', 'hyperband' or 'random'
+		Learning Rate: [1e-4, 5.0]
 	'''
+
 	batchSize = [4, 8, 16, 32, 64]
 	# objectives = ['val_accuracy']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
-	# max_trials = [2**i for i in range(6)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
 	learning_rate = (1e-4, 5.0)
 
@@ -213,22 +234,31 @@ def main():
 
 
 
-
-
 def run_base():
-	global project_name, overwrite_check
+	'''
+		Non-Optimized Hyperparameter AutoModel run over the same dataset
+	'''
+	global project_name
+
 	set_proj_name()
-	# model = ak.ImageClassifier(overwrite=True, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
-	if (not (overwrite_num is None)) and (not overwrite_check):
+
+	# Code dealing with AutoModel reuse or new model creation
+	if (not (overwrite_num is None)):
 		overwrite = False
-		overwrite_check = True
 	else:
 		overwrite = True
 	input_node, output_node = build_custom_search_space()
-	# model = ak.AutoModel(inputs=input_node, outputs=output_node, metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'], objective='val_accuracy', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+
+	# Server AutoModel creation
 	model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', overwrite=overwrite, max_trials=1, seed=SEED, project_name=project_name, directory=MY_DIR)
+
+	# Local AutoModel creation
 	# model = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', overwrite=overwrite, max_trials=1, seed=SEED)
+	
+	# 
 	model.fit(x_train, y_train, epochs=EPOCHS)
+	
+
 	predicted_y = model.predict(x_test)
 	# print(predicted_y)
 	model_eval = model.evaluate(x_test, y_test)
@@ -251,18 +281,6 @@ if __name__ == "__main__":
 		# y_train = tf.data.Dataset.from_tensor_slices(y_train)
 		val_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
-		# The batch size must now be set on the Dataset objects.
-		# batch_size = 256
-		# train_data = train_data.batch(batch_size)
-		# # y_train = y_train.batch(batch_size)
-		# val_data = val_data.batch(batch_size)
-
-		# # Disable AutoShard.
-		# options = tf.data.Options()
-		# options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
-		# train_data = train_data.with_options(options)
-		# val_data = val_data.with_options(options)
-		
 		main()
 	
 	else:

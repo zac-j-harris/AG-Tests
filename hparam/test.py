@@ -9,6 +9,7 @@ from tensorflow.keras.backend import clear_session
 import os, random, skopt, time
 from threading import Thread
 # from keras import metrics
+from keras import callbacks
 
 '''
 	Setup Parallel Processing
@@ -48,8 +49,8 @@ MAIN = True
 overwrite_num = None
 overwrite_check = False
 SEED = int(random.random() * 1000.0)
-print(SEED)
-hparam_vals = []
+print('Seed:', SEED)
+hparam_vals = {}
 
 # def get_fit_model(x_train, y_train, h_params=None):
 # 	clf = ak.ImageClassifier(overwrite=True, max_trials=1)
@@ -83,6 +84,26 @@ class ThreadWithReturnValue(Thread):
 		Thread.join(self, timeout=timeout)
 		return self._return
 
+'''
+Callback H-Param modifier class
+'''
+class HPO_Callback(callbacks.Callback):
+	def __init__(self, lr):
+		super(HPO_Callback, self).__init__()
+		self.lr = lr
+		# tf.keras.backend.set_value(self.model.optimizer.lr, lr)
+
+	def on_train_begin(self, logs=None):
+		tf.keras.backend.set_value(self.model.optimizer.lr, self.lr)
+
+	def on_epoch_begin(self, epoch, logs=None):
+		if not hasattr(self.model.optimizer, "lr"):
+			raise ValueError('Optimizer must have a "lr" attribute.')
+		# Get the current learning rate from model's optimizer.
+		lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+		# Print the current learning rate.
+		print("\nEpoch %05d: Learning rate is %6.4f." % (epoch, lr))
+
 
 def threaded_min_func(hparams):
 	thread = ThreadWithReturnValue(target=minimizable_func, args=(hparams,))
@@ -97,12 +118,17 @@ def threaded_min_func(hparams):
 def minimizable_func(hparams):
 	global project_name, overwrite_check, hparam_vals, SEED
 	set_proj_name()
-	SEED = int(random.random() * 1000.0)
-	print(SEED)
+
+	if not (hparam_vals == {}):
+		if tuple(hparams) in hparam_vals.keys():
+			return hparam_vals[tuple(hparams)]
+
 	# (x_train, y_train), (x_test, y_test) = data
 	# objective = hparams[0]
+	
 	loss = hparams[0]
 	tuner = hparams[1]
+	learning_rate=hparams[2]
 	# epochs = hparams[2]
 	# objective, loss, tuner, epochs = hparams
 	if (not (overwrite_num is None)) and (not overwrite_check):
@@ -110,18 +136,18 @@ def minimizable_func(hparams):
 		overwrite_check = True
 	else:
 		overwrite = True
+	
 	# tf.debugging.set_log_device_placement(True)
-	# strategy = tf.distribute.MirroredStrategy(gpus)
-	# with strategy.scope():
 	try:
 		input_node, output_node = build_custom_search_space()
-		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, metrics=['loss', 'accuracy', 'val_loss', 'val_accuracy'], objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=True, max_trials=1, distribution_strategy=tf.distribute.MirroredStrategy(GPUS))
+		
 		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
 		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
-		clf.fit(train_data, epochs=None)
-		# clf.export_model()
-		# return 1-clf.evaluate(x_test, y_test)[1]
+		
+		clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate)])
+
 		model_eval = clf.evaluate(val_data)
+
 		if type(model_eval) == list:
 			out = 1 - model_eval[1]
 			print('Validation (Loss, Acc): ', model_eval)
@@ -133,7 +159,8 @@ def minimizable_func(hparams):
 		print(e)
 		out = 1.0
 	clear_session()
-	hparam_vals.append(out)
+	
+	hparam_vals[tuple(hparams)] = (out)
 	return out
 
 
@@ -164,82 +191,27 @@ def main():
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	# max_trials = [2**i for i in range(6)]
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
-	# learning_rate = (1e-4, 5.0)
+	learning_rate = (1e-4, 5.0)
 
-	# epochs = [1, 200]
 
-	dims = [loss, tuners]
+	dims = [loss, tuners, learning_rate]
 
-	# ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0]], dimensions=dims)
-	# print(ret.x)
-	# print(ret.fun)
-	for _ in range(30):
-		for loss_fun in loss:
-			for tuner in tuners:
-				hp = (loss_fun, tuner)
-				threaded_min_func(hp)
+	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0], 5e-3], dimensions=dims)
+	print(ret.x)
+	print(ret.fun)
+	
+
+	# for _ in range(30):
+	# 	for loss_fun in loss:
+	# 		for tuner in tuners:
+	# 			hp = (loss_fun, tuner)
+	# 			threaded_min_func(hp)
 	# hp = (loss[1], tuners[0])
 	# for i in range(10):
 		# threaded_min_func(hp)
 	# print('hparam vals: ', hparam_vals)
 
 
-
-
-	# h_params = {'objective': objectives, 'tuner': tuners, 'loss': loss, 'max_trials': max_trials}
-	# create a dictionary from the hyperparameter grid
-	# model = get_fit_model(x_train, y_train)
-	# test_model(model)
-	# quit()
-	# model = KerasClassifier(build_fn=get_model, verbose=1)
-
-	# grid = dict(
-	# 	'objective'=objectives,
-	# 	'tuner'=tuners,
-	# 	'loss'=loss,
-	# 	'max_trials'=max_trials
-	# )
-
-	# learnRate = [1e-2, 1e-3, 1e-4]
-	# epochs = [10, 20, 30, 40]
-	# grid = dict(
-	# 	# learnRate=learnRate,
-	# 	batch_size=batchSize,
-	# 	loss=loss,
-	# 	epochs=epochs
-	# )
-
-	# grid = GridSearchCV(
-	# 	n_jobs=-1, 
-	# 	verbose=1,
-	# 	return_train_score=True,
-	# 	cv=kfold_splits,  #StratifiedKFold(n_splits=kfold_splits, shuffle=True)
-	# 	param_grid=param_grid,
-	# )
-
-	# searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
-	# param_distributions=grid, scoring="accuracy")
-	# searchResults = searcher.fit(x_train, y_train)
-
-	# # initialize a random search with a 3-fold cross-validation and then
-	# # start the hyperparameter search process
-	# print("[INFO] performing random search...")
-	# searcher = RandomizedSearchCV(estimator=model, n_jobs=-1, cv=3,
-	# 	param_distributions=grid, scoring="accuracy")
-	# searchResults = searcher.fit(x_train, y_train)
-	
-	# # summarize grid search information
-	# bestScore = searchResults.best_score_
-	# bestParams = searchResults.best_params_
-	# print("[INFO] best score is {:.2f} using {}".format(bestScore,
-	# 	bestParams))
-
-
-	# # extract the best model, make predictions on our data, and show a classification report
-	# print("[INFO] evaluating the best model...")
-	# bestModel = searchResults.best_estimator_
-	# accuracy = bestModel.score(x_test, y_test)
-	# print("accuracy: {:.2f}%".format(accuracy * 100))
 
 
 
@@ -269,9 +241,8 @@ def run_base():
 
 if __name__ == "__main__":
 	# Gather data
-	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data(label_mode='fine')  # 'fine' or 'coarse'
-	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode glitches it
+	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
 
 	# set_proj_name()
 	if MAIN:

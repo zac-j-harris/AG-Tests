@@ -55,6 +55,7 @@ SEED = int(random.random() * 1000.0)
 print('Seed:', SEED)
 
 hparam_vals = {}
+hparam_check_list = []
 
 
 
@@ -129,9 +130,12 @@ def minimizable_func(hparams):
 	'''
 		Function defining a single AK training and evaluation run.
 	'''
-	global project_name, hparam_vals, SEED
+	global project_name, hparam_vals, SEED, hparam_check_list
 
 	set_proj_name()
+
+	# Add hparam configuration to currently checked (log hparam search configuration in order w/ reused values)
+	hparam_check_list.append(tuple(hparams))
 
 	# Check for reuse of hparam configuration. If reused, return prior value.
 	if not (hparam_vals == {}):
@@ -207,6 +211,7 @@ def main():
 		Tuners: greedy', 'bayesian', 'hyperband' or 'random'
 		Learning Rate: [1e-4, 5.0]
 	'''
+	global hparam_check_list
 
 	batchSize = [4, 8, 16, 32, 64]
 	# objectives = ['val_accuracy']
@@ -230,7 +235,7 @@ def main():
 	# hp = (loss[1], tuners[0])
 	# for i in range(10):
 		# threaded_min_func(hp)
-	# print('hparam vals: ', hparam_vals)
+	print('hparam vals: ', hparam_check_list)
 
 
 

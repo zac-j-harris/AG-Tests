@@ -122,11 +122,17 @@ def log_output(model_eval):
 		Function to log the output after each AK run.
 	'''
 	if type(model_eval) == list:
+		if model_eval[1] is None:
+			out = 10.0
+		else:
 			out = 1 - model_eval[1]
-			print('Validation (Loss, Acc): ', model_eval)
-			print('Output (1 - acc): ', out)
+		print('Validation (Loss, Acc): ', model_eval)
+		print('Output (1 - acc): ', out)
 	else:
-		out = model_eval
+		if model_eval is None:
+			out = 10.0
+		else:
+			out = model_eval
 		print('Validation Loss: ', model_eval)
 	return out
 
@@ -179,7 +185,7 @@ def minimizable_func(hparams):
 		out = log_output(model_eval)
 	except Exception as e:
 		print(e)
-		out = 1.0
+		out = 10.0
 
 	# Clear TF session (just in case it helps to clear CUDA GPU memory)
 	clear_session()

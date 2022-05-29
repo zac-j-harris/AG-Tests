@@ -44,6 +44,12 @@ def set_proj_name():
 	except:
 		project_name = 'auto_model'
 
+def reset_search_mem():
+	global hparam_vals, hparam_check_list
+	hparam_vals = {}
+	hparam_check_list = []
+
+
 '''
 	Setup project defaults
 '''
@@ -55,9 +61,7 @@ overwrite_num = None		# Which prior AK model to overwrite, None if create new mo
 SEED = int(random.random() * 1000.0)
 print('Seed:', SEED)
 
-hparam_vals = {}
-hparam_check_list = []
-
+reset_search_mem()
 
 
 class ThreadWithReturnValue(Thread):
@@ -233,6 +237,7 @@ def build_custom_search_space():
 
 
 
+
 def main():
 	'''
 		Objectives: val_accuracy, val_loss, https://faroit.com/keras-docs/1.2.2/objectives/#available-objectives
@@ -250,11 +255,32 @@ def main():
 	optimizers = ["SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "Ftrl"]
 
 
+	x0 = [loss[0], tuners[0], 5e-3, optimizers[2]]
 	dims = [loss, tuners, learning_rate, optimizers]
 
-	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0], 5e-3, "Adam"], dimensions=dims)
+	print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
+
+
+	# Bayesian HPO
+	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
+	print('hparam vals: ', hparam_check_list)
+
+	# Reset all known hparam configurations
+	reset_search_mem()
+	print('*'*50, '\nBeginning Random Search Hyperparameter Optimization\n', '*'*50)
+
+	# Random Search HPO
+	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	print(ret.x)
+	print(ret.fun)
+	print('hparam vals: ', hparam_check_list)
+
+	# Random search cv using sklearn
+	# {'C': scipy.stats.expon(scale=100), 'gamma': scipy.stats.expon(scale=.1), 'kernel': ['rbf'], 'class_weight':['balanced', None]}
+	# rnd_search_rf = RandomizedSearchCV(rf_clf, param_distributions=param_distribs, n_iter=10, cv=5, scoring='accuracy', random_state=42)
+	# rnd_search_rf.fit(X_train,y_train)
 	
 
 	# for _ in range(30):
@@ -265,7 +291,7 @@ def main():
 	# hp = (loss[1], tuners[0])
 	# for i in range(10):
 		# threaded_min_func(hp)
-	print('hparam vals: ', hparam_check_list)
+	# print('hparam vals: ', hparam_check_list)
 
 
 

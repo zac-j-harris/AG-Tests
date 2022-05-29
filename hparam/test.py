@@ -263,19 +263,18 @@ def main():
 
 	print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
 
-
-	# Bayesian HPO
-	# ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
-	# print(ret.x)
-	# print(ret.fun)
-	# print('hparam vals: ', hparam_check_list)
+	# Random Search HPO
+	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	print(ret.x)
+	print(ret.fun)
+	print('hparam vals: ', hparam_check_list)
 
 	# Reset all known hparam configurations
 	reset_search_mem()
 	print('*'*50, '\nBeginning Random Search Hyperparameter Optimization\n', '*'*50)
 
-	# Random Search HPO
-	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	# Bayesian HPO
+	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
 	print('hparam vals: ', hparam_check_list)
@@ -332,8 +331,8 @@ def run_base():
 
 
 def get_data():
-	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
+	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
 	return (x_train, y_train), (x_test, y_test)
 
 

@@ -6,7 +6,7 @@ import tensorflow as tf
 # from skopt import gp_minimize
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from tensorflow.keras.backend import clear_session
-import os, random, skopt, time
+import os, random, skopt, time, traceback
 from threading import Thread
 # from keras import metrics
 from tensorflow.keras import callbacks
@@ -83,18 +83,32 @@ class HPO_Callback(callbacks.Callback):
 	'''
 		Callback H-Param modifier class
 	'''
-	def __init__(self, lr):
+	optimizers = {
+	"SGD": tf.keras.optimizers.SGD(), 
+	"RMSprop": tf.keras.optimizers.RMSprop(), 
+	"Adam": tf.keras.optimizers.Adam(), 
+	"Adadelta": tf.keras.optimizers.Adadelta(), 
+	"Adagrad": tf.keras.optimizers.Adagrad(), 
+	"Adamax": tf.keras.optimizers.Adamax(), 
+	"Nadam": tf.keras.optimizers.Nadam(), 
+	"Ftrl": tf.keras.optimizers.Ftrl()
+	}
+
+	def __init__(self, lr, optimizer):
 		super(HPO_Callback, self).__init__()
 		self.lr = lr
-		# tf.keras.backend.set_value(self.model.optimizer.lr, lr)
+		self.optimizer = optimizer
 
 	def on_train_begin(self, logs=None):
+		# Set the current optimizer
+		self.model.optimizer = self.optimizers[self.optimizer]
+
 		# Set the current learning rate
 		tf.keras.backend.set_value(self.model.optimizer.lr, self.lr)
 		# Get the current learning rate from model's optimizer.
 		lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
 		# Print the current learning rate.
-		print("\nLearning rate is %6.4f." % (lr))
+		print("\nOptimizer is " + self.optimizer + ". Learning rate is %6.4f." % (lr))
 
 	# def on_epoch_begin(self, epoch, logs=None):
 	# 	if not hasattr(self.model.optimizer, "lr"):
@@ -158,6 +172,7 @@ def minimizable_func(hparams):
 	loss = hparams[0]
 	tuner = hparams[1]
 	learning_rate=hparams[2]
+	optimizer=hparams[3]
 
 	# Code dealing with AutoModel reuse or new model creation
 	if (not (overwrite_num is None)):
@@ -177,7 +192,7 @@ def minimizable_func(hparams):
 		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
 		
 		# Fit the model w/ set learning rate
-		clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate)])
+		clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate, optimizer=optimizer)])
 
 		# Evaluate the model
 		model_eval = clf.evaluate(val_data)
@@ -185,7 +200,9 @@ def minimizable_func(hparams):
 		# Get and log the model evaluation loss
 		out = log_output(model_eval)
 	except Exception as e:
-		print(e)
+		out = str(traceback.format_exc())
+		print(out)
+		print('\n', e)
 		out = 10.0
 
 	# Clear TF session (just in case it helps to clear CUDA GPU memory)
@@ -206,7 +223,7 @@ def build_custom_search_space():
 		# Only search ResNet architectures.
 		block_type="vanilla",
 		# Normalize the dataset.
-		normalize=False,
+		normalize=True,
 		# Do not do data augmentation.
 		augment=False,
 	)(input_node)
@@ -230,11 +247,12 @@ def main():
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
 	learning_rate = (1e-4, 5.0)
+	optimizers = ["SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "Ftrl"]
 
 
-	dims = [loss, tuners, learning_rate]
+	dims = [loss, tuners, learning_rate, optimizers]
 
-	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0], 5e-3], dimensions=dims)
+	ret = skopt.gp_minimize(threaded_min_func, x0=[loss[0], tuners[0], 5e-3, "Adam"], dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
 	
@@ -284,21 +302,15 @@ def run_base():
 	print('Val Accuracy: ', model_eval[1])
 
 
-def get_norm_data():
+def get_data():
 	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
-
-	min_max_norm = lambda i, j: (i-np.min(j)) / (np.max(j)-np.min(j))
-	x_train = min_max_norm(x_train, x_train)
-	x_test = min_max_norm(x_test, x_train)
-	y_train = min_max_norm(y_train, y_train)
-	y_test = min_max_norm(y_test, y_train)
 	return (x_train, y_train), (x_test, y_test)
 
 
 if __name__ == "__main__":
 	# Gather data
-	(x_train, y_train), (x_test, y_test) = get_norm_data()
+	(x_train, y_train), (x_test, y_test) = get_data()
 
 	if MAIN:
 		# Wrap data in Dataset objects.

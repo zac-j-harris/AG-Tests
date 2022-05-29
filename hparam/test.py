@@ -2,6 +2,7 @@
 import autokeras as ak
 from tensorflow.keras import datasets
 import tensorflow as tf
+from autokeras import tuners
 # from sklearn.model_selection import RandomizedSearchCV
 # from skopt import gp_minimize
 # from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
@@ -63,6 +64,14 @@ print('Seed:', SEED)
 
 reset_search_mem()
 
+# TUNER_CLASSES = {
+# 	"bayesian": tuners.BayesianOptimization,
+# 	"random": tuners.RandomSearch,
+# 	"hyperband": tuners.Hyperband,
+# 	"greedy": tuners.Greedy,
+# }
+
+
 
 class ThreadWithReturnValue(Thread):
 	'''
@@ -83,44 +92,50 @@ class ThreadWithReturnValue(Thread):
 		return self._return
 
 
-class HPO_Callback(callbacks.Callback):
-	'''
-		Callback H-Param modifier class
-	'''
-	optimizers = {
-	"SGD": tf.keras.optimizers.SGD(), 
-	"RMSprop": tf.keras.optimizers.RMSprop(), 
-	"Adam": tf.keras.optimizers.Adam(), 
-	"Adadelta": tf.keras.optimizers.Adadelta(), 
-	"Adagrad": tf.keras.optimizers.Adagrad(), 
-	"Adamax": tf.keras.optimizers.Adamax(), 
-	"Nadam": tf.keras.optimizers.Nadam(), 
-	"Ftrl": tf.keras.optimizers.Ftrl()
-	}
+# class HPO_Callback(callbacks.Callback):
+# 	'''
+# 		Callback H-Param modifier class
+# 	'''
+# 	optimizers = {
+# 	"SGD": tf.keras.optimizers.SGD(), 
+# 	"RMSprop": tf.keras.optimizers.RMSprop(), 
+# 	"Adam": tf.keras.optimizers.Adam(), 
+# 	"Adadelta": tf.keras.optimizers.Adadelta(), 
+# 	"Adagrad": tf.keras.optimizers.Adagrad(), 
+# 	"Adamax": tf.keras.optimizers.Adamax(), 
+# 	"Nadam": tf.keras.optimizers.Nadam(), 
+# 	"Ftrl": tf.keras.optimizers.Ftrl()
+# 	}
 
-	def __init__(self, lr, optimizer):
-		super(HPO_Callback, self).__init__()
-		self.lr = lr
-		self.optimizer = optimizer
+# 	def __init__(self, lr, optimizer):
+# 		super(HPO_Callback, self).__init__()
+# 		self.lr = lr
+# 		self.optimizer = optimizer
 
-	def on_train_begin(self, logs=None):
-		# Set the current optimizer
-		self.model.optimizer = self.optimizers[self.optimizer]
+# 	def on_train_begin(self, logs=None):
+# 		# Set the current optimizer
+# 		self.model.optimizer = self.optimizers[self.optimizer]
 
-		# Set the current learning rate
-		tf.keras.backend.set_value(self.model.optimizer.lr, self.lr)
-		# Get the current learning rate from model's optimizer.
-		lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
-		# Print the current learning rate.
-		print("\nOptimizer is " + self.optimizer + ". Learning rate is %6.4f." % (lr))
+# 		# Set the current learning rate
+# 		tf.keras.backend.set_value(self.model.optimizer.lr, self.lr)
+# 		# Get the current learning rate from model's optimizer.
+# 		lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+# 		# Print the current learning rate.
+# 		print("\nOptimizer is " + self.optimizer + ". Learning rate is %6.4f." % (lr))
 
-	# def on_epoch_begin(self, epoch, logs=None):
-	# 	if not hasattr(self.model.optimizer, "lr"):
-	# 		raise ValueError('Optimizer must have a "lr" attribute.')
-	# 	# Get the current learning rate from model's optimizer.
-	# 	lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
-	# 	# Print the current learning rate.
-	# 	print("Learning rate is %6.4f." % (lr))
+# 	# def on_epoch_begin(self, epoch, logs=None):
+# 	# 	if not hasattr(self.model.optimizer, "lr"):
+# 	# 		raise ValueError('Optimizer must have a "lr" attribute.')
+# 	# 	# Get the current learning rate from model's optimizer.
+# 	# 	lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+# 	# 	# Print the current learning rate.
+# 	# 	print("Learning rate is %6.4f." % (lr))
+
+
+class customTuner(ak.engine.tuner.AutoTuner):
+	def __init__(self, oracle, hypermodel, **kwargs):
+		super().__init__(oracle, hypermodel, **kwargs)
+
 
 
 def threaded_min_func(hparams):
@@ -172,11 +187,17 @@ def minimizable_func(hparams):
 		if tuple(hparams) in hparam_vals.keys():
 			return hparam_vals[tuple(hparams)]
 	
-	# Separate out the hyperparameters
+	# Separate out the hyperparameters from [loss, tuners, alpha, beta, factor, hyperband_iterations]
 	loss = hparams[0]
-	tuner = hparams[1]
-	learning_rate=hparams[2]
-	optimizer=hparams[3]
+	oracle = hparams[1]
+	alpha = hparams[2]
+	beta = hparams[3]
+	factor = hparams[4]
+	hyperband_iterations = hparams[5]
+
+
+	# learning_rate=hparams[2]
+	# optimizer=hparams[3]
 
 	# Code dealing with AutoModel reuse or new model creation
 	if (not (overwrite_num is None)):
@@ -190,10 +211,17 @@ def minimizable_func(hparams):
 		input_node, output_node = build_custom_search_space()
 		
 		# Server AutoModel creation
-		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', loss=loss, tuner=tuner, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
-		
+		clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_loss', loss=loss, tuner=oracle, seed=SEED, project_name=project_name, directory=MY_DIR, overwrite=overwrite, max_trials=1)
+
 		# Local AutoModel creation
-		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=tuner, seed=SEED, overwrite=True, max_trials=1)
+		# clf = ak.AutoModel(inputs=input_node, outputs=output_node, objective='val_accuracy', loss=loss, tuner=oracle, seed=SEED, overwrite=True, max_trials=1)
+
+		if oracle == 'bayesian':
+			clf.tuner.oracle.alpha = float(alpha)
+			clf.tuner.oracle.beta = float(beta)
+		elif oracle == 'hyperband':
+			clf.tuner.oracle.factor = int(factor)
+			clf.tuner.oracle.hyperband_iterations = int(hyperband_iterations)
 		
 		# Fit the model w/ set learning rate
 		clf.fit(train_data, epochs=None)
@@ -248,23 +276,38 @@ def main():
 	'''
 	global hparam_check_list
 
-	batchSize = [4, 8, 16, 32, 64]
+	# batchSize = [4, 8, 16, 32, 64]
 	# objectives = ['val_accuracy']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
-	# learning_rate = (1e-4, 5.0)
-	# optimizers = ["SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "Ftrl"]
+	alpha = (1e-6, 10.0)
+	beta = (1e-4, 100)
+	factor = (2, 10)
+	hyperband_iterations = (1, 10)
+
+	# Greedy Oracle Hparams:	Objective, Max Trials, seed
+	# Bayesian OHP:				Objective, Max Trials, seed, alpha, beta
+	# 		alpha: 		Float, the value added to the diagonal of the kernel matrix during fitting. 
+	# 						It represents the expected amount of noise in the observed performances in Bayesian optimization. Defaults to 1e-4.
+	# 		beta: 		Float, the balancing factor of exploration and exploitation. The larger it is, the more explorative it is. Defaults to 2.6.
+	# Hyperband OHP: 			Objective, Max Trials, seed, factor, hyperband_iterations
+	# 		hyperband_iterations:	Integer, at least 1, the number of times to iterate over the full Hyperband algorithm. 
+	# 								One iteration will run approximately max_epochs * (math.log(max_epochs, factor) ** 2) cumulative epochs across all trials. 
+	# 								It is recommended to set this to as high a value as is within your resource budget. Defaults to 1.
+	# 		factor:	Integer, the reduction factor for the number of epochs and number of models for each bracket. Defaults to 3.
+	# Random OHP: 				Objective, Max Trials, seed
+	# 
+	# total list: [alpha, beta, factor, hyperband_iterations]
 
 
-	# x0 = [loss[0], tuners[0], 5e-3, optimizers[2]]
-	x0 = [loss[0], tuners[0]]
-	# dims = [loss, tuners, learning_rate, optimizers]
-	dims = [loss, tuners]
+	x0 = [loss[0], tuners[1], alpha[0], beta[0], factor[0], 2]
+	dims = [loss, tuners, alpha, beta, factor, hyperband_iterations]
+
 
 	print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
 
-	# Random Search HPO
-	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	# Bayesian HPO
+	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
 	print('hparam vals: ', hparam_check_list)
@@ -273,8 +316,8 @@ def main():
 	reset_search_mem()
 	print('*'*50, '\nBeginning Random Search Hyperparameter Optimization\n', '*'*50)
 
-	# Bayesian HPO
-	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	# Random Search HPO
+	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims)
 	print(ret.x)
 	print(ret.fun)
 	print('hparam vals: ', hparam_check_list)
@@ -331,8 +374,8 @@ def run_base():
 
 
 def get_data():
-	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
+	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
 	return (x_train, y_train), (x_test, y_test)
 
 

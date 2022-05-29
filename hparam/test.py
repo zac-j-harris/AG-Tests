@@ -9,7 +9,7 @@ from tensorflow.keras.backend import clear_session
 import os, random, skopt, time
 from threading import Thread
 # from keras import metrics
-from keras import callbacks
+from tensorflow.keras import callbacks
 
 '''
 	Setup Parallel Processing
@@ -119,9 +119,9 @@ def log_output(model_eval):
 			out = 1 - model_eval[1]
 			print('Validation (Loss, Acc): ', model_eval)
 			print('Output (1 - acc): ', out)
-		else:
-			out = model_eval
-			print('Validation Loss: ', model_eval)
+	else:
+		out = model_eval
+		print('Validation Loss: ', model_eval)
 	return out
 
 

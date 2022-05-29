@@ -88,15 +88,20 @@ class HPO_Callback(callbacks.Callback):
 		# tf.keras.backend.set_value(self.model.optimizer.lr, lr)
 
 	def on_train_begin(self, logs=None):
+		# Set the current learning rate
 		tf.keras.backend.set_value(self.model.optimizer.lr, self.lr)
-
-	def on_epoch_begin(self, epoch, logs=None):
-		if not hasattr(self.model.optimizer, "lr"):
-			raise ValueError('Optimizer must have a "lr" attribute.')
 		# Get the current learning rate from model's optimizer.
 		lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
 		# Print the current learning rate.
-		print("Learning rate is %6.4f." % (lr))
+		print("\nLearning rate is %6.4f." % (lr))
+
+	# def on_epoch_begin(self, epoch, logs=None):
+	# 	if not hasattr(self.model.optimizer, "lr"):
+	# 		raise ValueError('Optimizer must have a "lr" attribute.')
+	# 	# Get the current learning rate from model's optimizer.
+	# 	lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+	# 	# Print the current learning rate.
+	# 	print("Learning rate is %6.4f." % (lr))
 
 
 def threaded_min_func(hparams):

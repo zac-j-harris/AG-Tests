@@ -95,7 +95,7 @@ class HPO_Callback(callbacks.Callback):
 		# Get the current learning rate from model's optimizer.
 		lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
 		# Print the current learning rate.
-		print("\nEpoch %05d: Learning rate is %6.4f." % (epoch, lr))
+		print("Learning rate is %6.4f." % (lr))
 
 
 def threaded_min_func(hparams):

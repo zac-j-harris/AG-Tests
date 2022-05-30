@@ -374,8 +374,8 @@ def run_base():
 
 
 def get_data():
-	# (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-	(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
+	(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
+	# (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()  # 'label_mode' param glitches it
 	return (x_train, y_train), (x_test, y_test)
 
 

@@ -274,7 +274,7 @@ def main():
 		Tuners: greedy', 'bayesian', 'hyperband' or 'random'
 		Learning Rate: [1e-4, 5.0]
 	'''
-	global hparam_check_list
+	global hparam_check_list, SEED
 
 	# batchSize = [4, 8, 16, 32, 64]
 	# objectives = ['val_accuracy']
@@ -307,7 +307,7 @@ def main():
 	print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
 
 	# Bayesian HPO
-	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	ret = skopt.gp_minimize(threaded_min_func, x0=x0, dimensions=dims, random_state=SEED, acq_func='LCB', kappa=10.0)
 	print(ret.x)
 	print(ret.fun)
 	print('hparam vals: ', hparam_check_list)
@@ -317,7 +317,7 @@ def main():
 	print('*'*50, '\nBeginning Random Search Hyperparameter Optimization\n', '*'*50)
 
 	# Random Search HPO
-	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims)
+	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, dimensions=dims, random_state=SEED)
 	print(ret.x)
 	print(ret.fun)
 	print('hparam vals: ', hparam_check_list)

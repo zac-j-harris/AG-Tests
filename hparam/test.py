@@ -170,6 +170,29 @@ def log_output(model_eval):
 		print('Validation Loss: ', model_eval)
 	return out
 
+def check_for_prior_runs(hparam_vals, hparams):
+	
+	keys = hparam_vals.keys()
+	if tuple(hparams) in keys:
+		return hparam_vals[tuple(hparams)]
+	
+	if hparams[1] == 'greedy' or hparams[1] == 'random':
+		# Check greedy and random
+		for i in range(len(keys)):
+			if keys[i][0] == hparams[0] and keys[i][1] == hparams[1]:
+				return hparam_vals[keys[i]]
+	elif hparams[1] == 'bayesian':
+		# Check bayesian
+		for i in range(len(keys)):
+			if keys[i][0] == hparams[0] and keys[i][1] == hparams[1] and keys[i][2] == hparams[2] and keys[i][3] == hparams[3]:
+				return hparam_vals[keys[i]]
+	else:
+		# Check hyperband
+		for i in range(len(keys)):
+			if keys[i][0] == hparams[0] and keys[i][1] == hparams[1] and keys[i][4] == hparams[4] and keys[i][5] == hparams[5]:
+				return hparam_vals[keys[i]]
+	return None
+
 
 def minimizable_func(hparams):
 	'''
@@ -194,25 +217,9 @@ def minimizable_func(hparams):
 
 	# Check for reuse of hparam configuration. If reused, return prior value.
 	if not (hparam_vals == {}):
-		keys = hparam_vals.keys()
-		if tuple(hparams) in keys:
-			return hparam_vals[tuple(hparams)]
-		
-		if oracle == 'greedy' or oracle == 'random':
-			# Check greedy and random
-			for i in range(len(keys))
-				if keys[i][0] == loss and keys[i][1] == oracle:
-					return hparam_vals[keys[i]]
-		elif oracle == 'bayesian':
-			# Check bayesian
-			for i in range(len(keys))
-				if keys[i][0] == loss and keys[i][1] == oracle and keys[i][2] == alpha and keys[i][3] == beta:
-					return hparam_vals[keys[i]]
-		else:
-			# Check hyperband
-			for i in range(len(keys))
-				if keys[i][0] == loss and keys[i][1] == oracle and keys[i][4] == factor and keys[i][5] == hyperband_iterations:
-					return hparam_vals[keys[i]]
+		match_key_found = check_for_prior_runs(hparam_vals, hparams)
+		if not (match_key_found is None) :
+			return hparam_vals[match_key_found]
 
 
 	# learning_rate=hparams[2]

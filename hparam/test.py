@@ -174,7 +174,7 @@ def log_output(model_eval):
 
 def check_for_prior_runs(hparam_vals, hparams):
 	
-	keys = hparam_vals.keys()
+	keys = list(hparam_vals.keys())
 	if tuple(hparams) in keys:
 		return hparam_vals[tuple(hparams)]
 	

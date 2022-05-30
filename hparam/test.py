@@ -182,11 +182,7 @@ def minimizable_func(hparams):
 	# Add hparam configuration to currently checked (log hparam search configuration in order w/ reused values)
 	hparam_check_list.append(tuple(hparams))
 
-	# Check for reuse of hparam configuration. If reused, return prior value.
-	if not (hparam_vals == {}):
-		if tuple(hparams) in hparam_vals.keys():
-			return hparam_vals[tuple(hparams)]
-	
+
 	# Separate out the hyperparameters from [loss, tuners, alpha, beta, factor, hyperband_iterations]
 	loss = hparams[0]
 	oracle = hparams[1]
@@ -194,6 +190,29 @@ def minimizable_func(hparams):
 	beta = hparams[3]
 	factor = hparams[4]
 	hyperband_iterations = hparams[5]
+
+
+	# Check for reuse of hparam configuration. If reused, return prior value.
+	if not (hparam_vals == {}):
+		keys = hparam_vals.keys()
+		if tuple(hparams) in keys:
+			return hparam_vals[tuple(hparams)]
+		
+		if oracle == 'greedy' or oracle == 'random':
+			# Check greedy and random
+			for i in range(len(keys))
+				if keys[i][0] == loss and keys[i][1] == oracle:
+					return hparam_vals[keys[i]]
+		elif oracle == 'bayesian':
+			# Check bayesian
+			for i in range(len(keys))
+				if keys[i][0] == loss and keys[i][1] == oracle and keys[i][2] == alpha and keys[i][3] == beta:
+					return hparam_vals[keys[i]]
+		else:
+			# Check hyperband
+			for i in range(len(keys))
+				if keys[i][0] == loss and keys[i][1] == oracle and keys[i][4] == factor and keys[i][5] == hyperband_iterations:
+					return hparam_vals[keys[i]]
 
 
 	# learning_rate=hparams[2]

@@ -168,7 +168,7 @@ def log_output(model_eval):
 		if model_eval is None:
 			out = 10.0
 		else:
-			out = model_eval
+			out = float(model_eval)
 		print('Validation Loss: ', model_eval)
 	return out
 
@@ -221,7 +221,7 @@ def minimizable_func(hparams):
 	if not (hparam_vals == {}):
 		match_key_found = check_for_prior_runs(hparam_vals, hparams)
 		if not (match_key_found is None) :
-			return hparam_vals[match_key_found]
+			return match_key_found
 
 
 	# learning_rate=hparams[2]

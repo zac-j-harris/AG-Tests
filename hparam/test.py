@@ -252,7 +252,7 @@ def minimizable_func(hparams):
 			clf.tuner.oracle.hyperband_iterations = int(hyperband_iterations)
 		
 		# Fit the model w/ set learning rate
-		clf.fit(train_data, epochs=None)
+		clf.fit(train_data, epochs=50)
 		# clf.fit(train_data, epochs=None, callbacks=[HPO_Callback(lr=learning_rate, optimizer=optimizer)])
 
 		# Evaluate the model

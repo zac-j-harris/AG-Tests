@@ -13,23 +13,24 @@ from threading import Thread
 from tensorflow.keras import callbacks
 import numpy as np
 
-'''
+"""
 	Setup Parallel Processing
-'''
+"""
 GPUS = tf.config.list_logical_devices('GPU')
 
 
-'''
+"""
 	Setup Project Name
-'''
+"""
 MY_DIR = '/gscratch/zharris1/Workspace/prior_runs/'
 project_name = 'auto_model'
 
 def set_proj_name():
-	'''
-		Creates a custom project name after checking against currently used names.
-		Sets global variable project_name for use as model save filename
-	'''
+	"""
+	Creates a custom project name after checking against currently used names.
+	
+	Sets global variable project_name for use as model save filename
+	"""
 	global project_name
 	try:
 		if (not (overwrite_num is None)):
@@ -51,9 +52,9 @@ def reset_search_mem():
 	hparam_check_list = []
 
 
-'''
+"""
 	Setup project defaults
-'''
+"""
 EPOCHS = None
 MAIN = True
 
@@ -76,9 +77,9 @@ reset_search_mem()
 
 
 class ThreadWithReturnValue(Thread):
-	'''
-		Thread Class that returns value from internal function
-	'''
+	"""
+	Thread Class that returns value from internal function
+	"""
 	def __init__(self, group=None, target=None, name=None,
 				 args=(), kwargs=None, *, daemon=None):
 		Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
@@ -95,9 +96,9 @@ class ThreadWithReturnValue(Thread):
 
 
 # class HPO_Callback(callbacks.Callback):
-# 	'''
+# 	"""
 # 		Callback H-Param modifier class
-# 	'''
+# 	"""
 # 	optimizers = {
 # 	"SGD": tf.keras.optimizers.SGD(), 
 # 	"RMSprop": tf.keras.optimizers.RMSprop(), 
@@ -141,9 +142,9 @@ class customTuner(ak.engine.tuner.AutoTuner):
 
 
 def threaded_min_func(hparams):
-	'''
+	"""
 		Function to internalize each AutoKeras run into a process.
-	'''
+	"""
 	thread = ThreadWithReturnValue(target=minimizable_func, args=(hparams,))
 	thread.daemon = True
 	thread.start()
@@ -154,9 +155,9 @@ def threaded_min_func(hparams):
 
 
 def log_output(model_eval):
-	'''
-		Function to log the output after each AK run.
-	'''
+	"""
+	Function to log the output after each AK run.
+	"""
 	if type(model_eval) == list:
 		if model_eval[1] is None:
 			out = 10.0
@@ -197,9 +198,9 @@ def check_for_prior_runs(hparam_vals, hparams):
 
 
 def minimizable_func(hparams):
-	'''
-		Function defining a single AK training and evaluation run.
-	'''
+	"""
+	Function defining a single AK training and evaluation run.
+	"""
 	global project_name, hparam_vals, SEED, hparam_check_list
 
 	set_proj_name()
@@ -276,9 +277,9 @@ def minimizable_func(hparams):
 
 
 def build_custom_search_space():
-	'''
-		Function that creates and returns a custom Image Classifier model for AutoKeras
-	'''
+	"""
+	Function that creates and returns a custom Image Classifier model for AutoKeras
+	"""
 	input_node = ak.ImageInput()
 	output_node = ak.ImageBlock(
 		# Only search ResNet architectures.
@@ -296,12 +297,14 @@ def build_custom_search_space():
 
 
 def main():
-	'''
+	"""
+	Main method
+		
 		Objectives: val_accuracy, val_loss, https://faroit.com/keras-docs/1.2.2/objectives/#available-objectives
 		Loss: keras loss function
 		Tuners: greedy', 'bayesian', 'hyperband' or 'random'
 		Learning Rate: [1e-4, 5.0]
-	'''
+	"""
 	global hparam_check_list, SEED, N_CALLS
 
 	# batchSize = [4, 8, 16, 32, 64]
@@ -369,9 +372,9 @@ def main():
 
 
 def run_base():
-	'''
-		Non-Optimized Hyperparameter AutoModel run over the same dataset
-	'''
+	"""
+	Non-Optimized Hyperparameter AutoModel run over the same dataset
+	"""
 	global project_name
 
 	set_proj_name()

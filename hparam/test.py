@@ -294,6 +294,47 @@ def build_custom_search_space():
 	return input_node, output_node
 
 
+def grid_search(func, x0, hparams):
+	loss = hparams[0]
+	tuners = hparams[1]
+	alpha = hparams[2]
+	beta = hparams[3]
+	factor = hparams[4]
+	hyperband_iterations = hparams[5]
+
+	titles = ['Greedy -###', 'Random search -###']
+	params = x0
+	
+	for tuner in range(2):
+		params[1] = tuners[3] if tuner > 0 else tuners[0]
+		print(titles[tuner])
+		for l in loss:
+			params[0] = l
+			func(params)
+
+
+	print('Bayesian -###')
+	params[1] = tuners[1]
+	for l in range(2):
+		params[0] = loss[l]
+		for a in range(8):
+			params[2] = alpha[0] * 10**a
+			for b in range(10):
+				params[3] = beta[0] * 10**b if b < 5 else 1.0 + 9 * (b-4)
+				# print(params, func(params))
+				func(params)
+
+	print('Hyperband -###')
+	params[1] = tuners[2]
+	for l in range(2):
+		params[0] = loss[l]
+		for f in range(2, 11):
+			params[4] = f
+			for hpi in range(1, 11):
+				params[5] = hpi
+				# print('Model Eval: ', params, func(params))
+				func(params)
+
 
 
 def main():
@@ -311,8 +352,11 @@ def main():
 	# objectives = ['val_accuracy']
 	loss = ['categorical_crossentropy', 'binary_crossentropy']
 	tuners = ['greedy', 'bayesian', 'hyperband', 'random']
+	
+	# Bayesian specific
 	alpha = (1e-6, 10.0)
 	beta = (1e-4, 100)
+	# Hyperband specific
 	factor = (2, 10)
 	hyperband_iterations = (1, 10)
 
@@ -330,28 +374,32 @@ def main():
 	# 
 	# total list: [alpha, beta, factor, hyperband_iterations]
 
-
-	x0 = [loss[0], tuners[1], alpha[0], beta[0], factor[0], 2]
 	dims = [loss, tuners, alpha, beta, factor, hyperband_iterations]
+	x0 = [loss[0], tuners[0], alpha[0], beta[0], factor[0], 1]
+	
+	grid_search(threaded_min_func, x0, dims)
 
 
-	print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
+	# x0 = [loss[0], tuners[1], alpha[0], beta[0], factor[0], 2]
 
-	# Bayesian HPO
-	ret = skopt.gp_minimize(threaded_min_func, x0=x0, n_calls=N_CALLS, dimensions=dims, random_state=SEED, acq_func='LCB', kappa=10.0)
-	print(ret.x)
-	print(ret.fun)
-	print('hparam vals: ', hparam_check_list)
 
-	# Reset all known hparam configurations
-	reset_search_mem()
-	print('*'*50, '\nBeginning Random Search Hyperparameter Optimization\n', '*'*50)
+	# print('*'*50, '\nBeginning Bayesian Hyperparameter Optimization\n', '*'*50)
 
-	# Random Search HPO
-	ret = skopt.dummy_minimize(threaded_min_func, x0=x0, n_calls=N_CALLS, dimensions=dims, random_state=SEED)
-	print(ret.x)
-	print(ret.fun)
-	print('hparam vals: ', hparam_check_list)
+	# # Bayesian HPO
+	# ret = skopt.gp_minimize(threaded_min_func, x0=x0, n_calls=N_CALLS, dimensions=dims, random_state=SEED, acq_func='LCB', kappa=10.0)
+	# print(ret.x)
+	# print(ret.fun)
+	# print('hparam vals: ', hparam_check_list)
+
+	# # Reset all known hparam configurations
+	# reset_search_mem()
+	# print('*'*50, '\nBeginning Random Search Hyperparameter Optimization\n', '*'*50)
+
+	# # Random Search HPO
+	# ret = skopt.dummy_minimize(threaded_min_func, x0=x0, n_calls=N_CALLS, dimensions=dims, random_state=SEED)
+	# print(ret.x)
+	# print(ret.fun)
+	# print('hparam vals: ', hparam_check_list)
 
 	# Random search cv using sklearn
 	# {'C': scipy.stats.expon(scale=100), 'gamma': scipy.stats.expon(scale=.1), 'kernel': ['rbf'], 'class_weight':['balanced', None]}

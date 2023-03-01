@@ -60,7 +60,8 @@ MAIN = True
 
 overwrite_num = None		# Which prior AK model to overwrite, None if create new model save file
 
-SEED = int(random.random() * 1000.0)
+# SEED = int(random.random() * 1000.0)
+SEED = 692
 print('Seed:', SEED)
 
 N_CALLS = 1500
@@ -305,24 +306,24 @@ def grid_search(func, x0, hparams):
 	titles = ['Greedy -###', 'Random search -###']
 	params = x0
 	
-	for tuner in range(2):
-		params[1] = tuners[3] if tuner > 0 else tuners[0]
-		print(titles[tuner])
-		for l in loss:
-			params[0] = l
-			func(params)
+	# for tuner in range(2):
+	# 	params[1] = tuners[3] if tuner > 0 else tuners[0]
+	# 	print(titles[tuner])
+	# 	for l in loss:
+	# 		params[0] = l
+	# 		func(params)
 
 
-	print('Bayesian -###')
-	params[1] = tuners[1]
-	for l in range(2):
-		params[0] = loss[l]
-		for a in range(8):
-			params[2] = alpha[0] * 10**a
-			for b in range(10):
-				params[3] = beta[0] * 10**b if b < 5 else 1.0 + 9 * (b-4)
-				# print(params, func(params))
-				func(params)
+	# print('Bayesian -###')
+	# params[1] = tuners[1]
+	# for l in range(2):
+	# 	params[0] = loss[l]
+	# 	for a in range(8):
+	# 		params[2] = alpha[0] * 10**a
+	# 		for b in range(10):
+	# 			params[3] = beta[0] * 10**b if b < 5 else 1.0 + 9 * (b-4)
+	# 			# print(params, func(params))
+	# 			func(params)
 
 	print('Hyperband -###')
 	params[1] = tuners[2]

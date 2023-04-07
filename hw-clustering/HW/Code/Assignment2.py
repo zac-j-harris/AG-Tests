@@ -36,7 +36,7 @@ STEP_SIZE = 5
 RUNS = 30
 TEST_SIZE = 0.20
 
-RF_hps = [(1, 250), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (1, 1000), (1, 1000), (0.0, 0.5),
+RF_hps = [(1, 250), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (2, 1000), (1, 1000), (0.0, 0.5),
           ["sqrt", "log2", None], (1, int(1e8)), (0.0, 1e6), [False, True], (0.0, 1e6)]
 # XGB_hps = []
 SVM_hps = [(0.0, 1e4), (1e-7, 1e2), (1e-4, 1e5), ["epsilon_insensitive", "squared_epsilon_insensitive"],

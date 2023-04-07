@@ -20,9 +20,12 @@ from skopt import gp_minimize, dummy_minimize, forest_minimize, gbrt_minimize
 logger = logging.getLogger("MainLogger")
 logging.basicConfig(level=logging.INFO)
 
+_server_path = "/home/zharris1/Documents/Github/Arcc-git-tests/hw-clustering/HW/"
+_pc_path = "../"
+_current_path = _server_path
 
-ORIG_DATAPATH = "../Data/wine_quality/winequality-whites.csv"
-FIX_DATAPATH = "../Data/wine_quality/fixed-winequality-whites.csv"
+ORIG_DATAPATH = _current_path+"Data/wine_quality/winequality-whites.csv"
+FIX_DATAPATH = _current_path+"Data/wine_quality/fixed-winequality-whites.csv"
 
 warnings.filterwarnings("ignore", message="")
 

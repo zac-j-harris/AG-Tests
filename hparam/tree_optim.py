@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 '''
 	Setup project defaults
 '''
+
 MAIN = True
 
 
@@ -182,10 +183,10 @@ def get_data(pima=True):
 		X = data.copy()
 		y = X.pop('Survived')
 	else:
-		data = pd.read_csv('~/Desktop/diabetes.csv')
+		data = pd.read_csv('~/Datasets/pima-indians-diabetes/pima-indians-diabetes.csv')
 		data = data.dropna()
 		X = data.copy()
-		y = X.pop('Outcome')
+		y = X.pop('HasDiabetes')
 
 	x_train, x_test, y_train, y_test = train_test_split(X, y, random_state = 100)
 	return (x_train, y_train), (x_test, y_test)
@@ -202,7 +203,6 @@ if __name__ == "__main__":
 		for i in all_outs:
 			plt.plot(i)
 		plt.show()
-	
 	else:
 		run_base()
 

@@ -13,3 +13,4 @@ __pycache__/*
 libraries/*
 hparam/image_classifier/*
 hparam/auto_model/*
+*/Old/*

@@ -1,5 +1,5 @@
 import numpy as np
-import xgboost as xgb
+# import xgboost as xgb
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import HuberRegressor
 from sklearn.svm import LinearSVR
@@ -107,11 +107,11 @@ def SVM(X, y, seed, hparams) -> LinearSVR:
 	return SVM
 
 # @timed
-def XGB(X, y, seed, hparams) -> xgb.XGBRegressor:
-	"""Returns a fit sklearn XGB Model"""
-	GBDT = xgb.XGBRegressor(random_state=seed)
-	GBDT.fit(X, y)
-	return GBDT
+# def XGB(X, y, seed, hparams) -> xgb.XGBRegressor:
+# 	"""Returns a fit sklearn XGB Model"""
+# 	GBDT = xgb.XGBRegressor(random_state=seed)
+# 	GBDT.fit(X, y)
+# 	return GBDT
 
 # @timed
 def RF(X, y, seed, hparams) -> RandomForestRegressor:

@@ -38,9 +38,9 @@ RUNS = 300
 TEST_SIZE = 0.20
 
 RF_hps = [(1, 100), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (2, 100), (1, 100), (0.0, 0.5),
-          ["sqrt", "log2", None], (2, int(1e8)), (0.0, 1e6), [False, True], (0.0, 1e6)]
+		  ["sqrt", "log2", None], (2, int(1e8)), (0.0, 1e6), [False, True], (0.0, 1e6)]
 SVM_hps = [(0.0, 1e4), (1e-7, 1e2), (1e-4, 1e5), ["epsilon_insensitive", "squared_epsilon_insensitive"],
-           [False, True], (1e-4, 1e4), (1, int(1e6))]
+		   [False, True], (1e-4, 1e4), (1, int(1e6))]
 MLR_hps = [[False, True], [False, True]]
 HR_hps = [(1.0, 1e8), (1, int(1e6)), (0.0, 1e8), [False, True], [False, True], (1e-7, 1e2)]
 
@@ -74,7 +74,7 @@ class HPO_Class():
 		pass
 	def __minimizable_func__(self, hparams) -> float:
 		return train_and_get_test_MSE(func=self.opt_fn, data=self.data, labels=self.labels,
-		                              seed=self.seed, hparams=hparams)
+									  seed=self.seed, hparams=hparams)
 
 def timed(func):
 	"""Wrapper to time function runtime"""
@@ -104,7 +104,7 @@ def SVM(X, y, seed, hparams) -> LinearSVR:
 	"""Returns a fit sklearn Linear SVM Model"""
 	# SVM = SVR()
 	SVM = LinearSVR(random_state=seed, epsilon=hparams[0], tol=hparams[1], C=hparams[2], loss=hparams[3],
-	                fit_intercept=hparams[4], intercept_scaling=hparams[5], max_iter=hparams[6])
+					fit_intercept=hparams[4], intercept_scaling=hparams[5], max_iter=hparams[6])
 	SVM.fit(X, y)
 	return SVM
 
@@ -112,10 +112,10 @@ def SVM(X, y, seed, hparams) -> LinearSVR:
 def RF(X, y, seed, hparams) -> RandomForestRegressor:
 	"""Returns a fit sklearn RF Model"""
 	RF = RandomForestRegressor(random_state=seed, n_estimators=hparams[0], criterion=hparams[1],
-	                           min_samples_split=hparams[2], min_samples_leaf=hparams[3],
-	                           min_weight_fraction_leaf=hparams[4], max_features=hparams[5], max_leaf_nodes=hparams[6],
-	                           min_impurity_decrease=hparams[7], warm_start=hparams[8], ccp_alpha=hparams[9],
-	                           verbose=1, n_jobs=-1)
+							   min_samples_split=hparams[2], min_samples_leaf=hparams[3],
+							   min_weight_fraction_leaf=hparams[4], max_features=hparams[5], max_leaf_nodes=hparams[6],
+							   min_impurity_decrease=hparams[7], warm_start=hparams[8], ccp_alpha=hparams[9],
+							   verbose=1, n_jobs=-1)
 	RF.fit(X, y)
 	return RF
 
@@ -131,7 +131,7 @@ def MLR(X, y, seed, hparams) -> LinearRegression:
 def HR(X, y, seed, hparams) -> HuberRegressor:
 	"""Returns a fit sklearn Linear Model"""
 	HR = HuberRegressor(epsilon=hparams[0], max_iter=hparams[1], alpha=hparams[2], warm_start=hparams[3],
-	                    fit_intercept=hparams[4], tol=hparams[5])
+						fit_intercept=hparams[4], tol=hparams[5])
 	HR.fit(X, y)
 	return HR
 
@@ -200,7 +200,7 @@ def plot(means, stds, k, label, runs):
 
 def HPO(hpo_fn, data, labels, seed):
 	# optimizers = [(RF, RF_hps)]
-    optimizers = [(SVM, SVM_hps)]
+	optimizers = [(SVM, SVM_hps)]
 	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
@@ -239,7 +239,7 @@ def main():
 	logger.info("Data collected.")
 
 	train_data, test_data, train_labels, test_labels = train_test_split(data, labels, random_state=seed,
-	                                                                    test_size=TEST_SIZE)
+																		test_size=TEST_SIZE)
 
 	data = (train_data, test_data)
 	labels = (train_labels, test_labels)
@@ -265,6 +265,11 @@ if __name__ == "__main__":
 # Updated run.sh
 # 100: ORIG - 77, FIX  - 78
 # 200: FIX  - 79, ORIG - 80
+
+
+
+# 99 - SVM
+# 98 - RF
 
 
 

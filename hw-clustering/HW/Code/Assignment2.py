@@ -25,7 +25,7 @@ _server_path = "/home/zharris1/Documents/Github/Arcc-git-tests/hw-clustering/HW/
 _pc_path = "../"
 _current_path = _server_path
 
-ORIG_DATAPATH = _current_path+"Data/wine_quality/winequality-white.csv"
+ORIG_DATAPATH = _current_path+"Data/wine_quality/winequality-whites.csv"
 FIX_DATAPATH = _current_path+"Data/wine_quality/fixed-winequality-whites.csv"
 
 warnings.filterwarnings("ignore", message="")

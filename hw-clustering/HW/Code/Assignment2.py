@@ -47,7 +47,7 @@ Bayes_Opt = gp_minimize
 Random_Opt = dummy_minimize
 GBRT_Opt = gbrt_minimize
 
-test_data, val_data = [], []
+test_data, test_labels = [], []
 test_arr = []
 
 # 15 -> 39 -> 100 (exponential)

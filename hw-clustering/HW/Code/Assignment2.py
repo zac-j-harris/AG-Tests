@@ -69,6 +69,7 @@ class HPO_Class():
 		self.h_params = hps
 
 	def optimize(self):
+		global test_arr
 		test_arr = []
 		result = self.hpo_fn(func=self.__minimizable_func__, dimensions=self.h_params, n_calls=RUNS)
 		print(self.__class__.__name__, result.x)
@@ -151,6 +152,7 @@ def test_model(model, val_data, val_labels):
 
 
 def train_and_get_test_MSE(func, data, labels, seed, subarray_size=None, **kwargs):
+	global test_arr
 	"""Trains a model with the given arguments, and returns the test MSE"""
 	train_data, val_data = data
 	train_labels, val_labels = labels
@@ -159,10 +161,9 @@ def train_and_get_test_MSE(func, data, labels, seed, subarray_size=None, **kwarg
 	# 	model = func(X=train_data[:subarray_size,:], y=train_labels[:subarray_size], seed=seed, **kwargs)
 	# else:
 	model = func(X=train_data, y=train_labels, seed=seed, **kwargs)
-	mse = mean_squared_error(val_labels, model.predict(val_data))  # unrounded MSE
 	test_mse = mean_squared_error(test_labels, model.predict(test_data))
 	test_arr.append(test_mse)
-	return mse
+	return mean_squared_error(val_labels, model.predict(val_data))  # unrounded MSE
 	# return mean_squared_error(val_labels, np.round(model.predict(val_data)))  # rounded MSE
 	# return accuracy_score(val_labels, np.round(model.predict(val_data)))  # accuracy
 	# return mean_absolute_error(val_labels, model.predict(val_data))  # unrounded MAE
@@ -212,8 +213,8 @@ def plot(mse, label):
 def HPO(hpo_fn, data, labels, seed):
 	# print(label, means, k)
 	# plot(means, stds, k, label=label, runs=runs)
-	# optimizers = [(RF, RF_hps)]
-	optimizers = [(SVM, SVM_hps)]
+	optimizers = [(RF, RF_hps)]
+	# optimizers = [(SVM, SVM_hps)]
 	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
@@ -297,5 +298,9 @@ if __name__ == "__main__":
 # 19 - 25RF
 # 22 - SVM
 # 17 - MLR/HR
+
+# GBRT only
+# RF100 - 27
+# SVM - 28
 
 

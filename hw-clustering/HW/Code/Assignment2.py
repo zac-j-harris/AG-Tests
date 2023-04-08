@@ -213,8 +213,8 @@ def HPO(hpo_fn, data, labels, seed):
 	# print(label, means, k)
 	# plot(means, stds, k, label=label, runs=runs)
 	# optimizers = [(RF, RF_hps)]
-	# optimizers = [(SVM, SVM_hps)]
-	optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
+	optimizers = [(SVM, SVM_hps)]
+	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
 		hpo_inst.optimize()
@@ -292,10 +292,10 @@ if __name__ == "__main__":
 	pass
 
 
-# 16 - 25RF
-# 15 - 50RF
-# 14 - 100RF
-# 13 - SVM
-# 12 - MLR/HR
+# 21 - 100RF
+# 20 - 50RF
+# 19 - 25RF
+# 18 - SVM
+# 17 - MLR/HR
 
 

@@ -212,8 +212,8 @@ def plot(mse, label):
 def HPO(hpo_fn, data, labels, seed):
 	# print(label, means, k)
 	# plot(means, stds, k, label=label, runs=runs)
-	# optimizers = [(RF, RF_hps)]
-	optimizers = [(SVM, SVM_hps)]
+	optimizers = [(RF, RF_hps)]
+	# optimizers = [(SVM, SVM_hps)]
 	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
@@ -258,10 +258,10 @@ def main():
 	train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, random_state=seed, test_size=TEST_SIZE)
 	data = (train_data, val_data)
 	labels = (train_labels, val_labels)
-	logger.info("Beginning Bayesian HPO")
-	HPO(Bayes_Opt, data=data, labels=labels, seed=seed)
-	logger.info("Beginning Random HPO")
-	HPO(Random_Opt, data=data, labels=labels, seed=seed)
+	# logger.info("Beginning Bayesian HPO")
+	# HPO(Bayes_Opt, data=data, labels=labels, seed=seed)
+	# logger.info("Beginning Random HPO")
+	# HPO(Random_Opt, data=data, labels=labels, seed=seed)
 	logger.info("Beginning GB Regression Tree HPO")
 	HPO(GBRT_Opt, data=data, labels=labels, seed=seed)
 
@@ -295,7 +295,7 @@ if __name__ == "__main__":
 # 21 - 100RF
 # 20 - 50RF
 # 19 - 25RF
-# 21 - SVM
+# 22 - SVM
 # 17 - MLR/HR
 
 

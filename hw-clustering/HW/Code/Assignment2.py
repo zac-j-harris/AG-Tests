@@ -212,9 +212,9 @@ def plot(mse, label):
 def HPO(hpo_fn, data, labels, seed):
 	# print(label, means, k)
 	# plot(means, stds, k, label=label, runs=runs)
-	optimizers = [(RF, RF_hps)]
-    # optimizers = [(SVM, SVM_hps)]
-	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
+	# optimizers = [(RF, RF_hps)]
+	# optimizers = [(SVM, SVM_hps)]
+	optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
 		hpo_inst.optimize()

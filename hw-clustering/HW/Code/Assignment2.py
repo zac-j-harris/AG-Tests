@@ -235,7 +235,7 @@ def main():
 	np.random.seed(seed)
 	
 	# Grab Data
-	data, labels, columns = get_data(fname=FIX_DATAPATH)
+	data, labels, columns = get_data(fname=ORIG_DATAPATH)
 	logger.info("Data collected.")
 
 	train_data, test_data, train_labels, test_labels = train_test_split(data, labels, random_state=seed,
@@ -256,6 +256,7 @@ if __name__ == "__main__":
 	pass
 
 
+# 100: FIX  - 74, ORIG - 
 # 200: FIX  - 73, ORIG - 72
 # 500: ORIG - 71, FIX  - 70
 #1000: ORIG - 65, FIX  - 64

@@ -4,6 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import HuberRegressor
 from sklearn.svm import LinearSVR
 from sklearn.ensemble import RandomForestRegressor
+from skopt.learning import ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error #, accuracy_score, mean_absolute_error
 import csv
@@ -14,7 +15,7 @@ import warnings
 # from tqdm import tqdm
 import matplotlib.pyplot as plt
 import pickle
-from skopt import gp_minimize, dummy_minimize, forest_minimize, gbrt_minimize
+from skopt import gp_minimize, dummy_minimize, gbrt_minimize
 
 
 logger = logging.getLogger("MainLogger")
@@ -36,17 +37,15 @@ STEP_SIZE = 5
 RUNS = 30
 TEST_SIZE = 0.20
 
-RF_hps = [(1, 250), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (2, 1000), (1, 1000), (0.0, 0.5),
+RF_hps = [(1, 1000), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (2, 1000), (1, 1000), (0.0, 0.5),
           ["sqrt", "log2", None], (1, int(1e8)), (0.0, 1e6), [False, True], (0.0, 1e6)]
-# XGB_hps = []
 SVM_hps = [(0.0, 1e4), (1e-7, 1e2), (1e-4, 1e5), ["epsilon_insensitive", "squared_epsilon_insensitive"],
-           [False, True], (1e-4, 1e4), [False, True], (1, int(1e6))]
+           [False, True], (1e-4, 1e4), (1, int(1e6))]
 MLR_hps = [[False, True], [False, True]]
 HR_hps = [(1.0, 1e8), (1, int(1e6)), (0.0, 1e8), [False, True], [False, True], (1e-7, 1e2)]
 
 Bayes_Opt = gp_minimize
 Random_Opt = dummy_minimize
-DT_Opt = forest_minimize
 GBRT_Opt = gbrt_minimize
 
 
@@ -69,7 +68,7 @@ class HPO_Class():
 	def optimize(self):
 		result = self.hpo_fn(func=self.__minimizable_func__, dimensions=self.h_params, n_calls=RUNS)
 		print(self.__class__.__name__, result.x, result.fun)
-		print(result.x_iters, result.fun_vals)
+		print(result.x_iters, result.func_vals)
 	def plot(self) -> None:
 		# plot(means, stds, k, label=label, runs=runs)
 		pass
@@ -105,16 +104,9 @@ def SVM(X, y, seed, hparams) -> LinearSVR:
 	"""Returns a fit sklearn Linear SVM Model"""
 	# SVM = SVR()
 	SVM = LinearSVR(random_state=seed, epsilon=hparams[0], tol=hparams[1], C=hparams[2], loss=hparams[3],
-	                fit_intercept=hparams[4], intercept_scaling=hparams[5], dual=hparams[6], max_iter=hparams[7])
+	                fit_intercept=hparams[4], intercept_scaling=hparams[5], max_iter=hparams[6])
 	SVM.fit(X, y)
 	return SVM
-
-# @timed
-# def XGB(X, y, seed, hparams) -> xgb.XGBRegressor:
-# 	"""Returns a fit sklearn XGB Model"""
-# 	GBDT = xgb.XGBRegressor(random_state=seed)
-# 	GBDT.fit(X, y)
-# 	return GBDT
 
 # @timed
 def RF(X, y, seed, hparams) -> RandomForestRegressor:
@@ -207,16 +199,14 @@ def plot(means, stds, k, label, runs):
 
 
 def HPO(hpo_fn, data, labels, seed):
-	# print(label, means, k)
-	# plot(means, stds, k, label=label, runs=runs)
 	optimizers = [(RF, RF_hps),
-	              # (XGB, XGB_hps),
-	              (SVM, SVM_hps), (MLR, MLR_hps), (HR, HR_hps)]
+	              (SVM, SVM_hps), 
+	              (MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
 		hpo_inst.optimize()
-		hpo_inst.plot()
-		save_plot(fname="../Plots/comb_plot")
+		# hpo_inst.plot()
+		# save_plot(fname="../Plots/comb_plot")
 
 
 def save_data(data, fname):
@@ -237,7 +227,8 @@ def load_data(fname):
 
 def main():
 	# Generate seed
-	seed = random.randint(0, 1e9)
+	# seed = random.randint(0, 1e9)
+	seed = 71115919
 	print("Seed: ", seed)
 
 	random.seed(seed)
@@ -256,8 +247,6 @@ def main():
 	HPO(Bayes_Opt, data=data, labels=labels, seed=seed)
 	logger.info("Beginning Random HPO")
 	HPO(Random_Opt, data=data, labels=labels, seed=seed)
-	logger.info("Beginning Decision Tree HPO")
-	HPO(DT_Opt, data=data, labels=labels, seed=seed)
 	logger.info("Beginning GB Regression Tree HPO")
 	HPO(GBRT_Opt, data=data, labels=labels, seed=seed)
 

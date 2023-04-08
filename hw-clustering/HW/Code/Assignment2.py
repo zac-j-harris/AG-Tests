@@ -212,8 +212,8 @@ def plot(mse, label):
 def HPO(hpo_fn, data, labels, seed):
 	# print(label, means, k)
 	# plot(means, stds, k, label=label, runs=runs)
-	optimizers = [(RF, RF_hps)]
-    # optimizers = [(SVM, SVM_hps)]
+	# optimizers = [(RF, RF_hps)]
+    optimizers = [(SVM, SVM_hps)]
 	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		arr.append([])
@@ -294,5 +294,7 @@ if __name__ == "__main__":
 
 # 04 - 50RF
 # 05 - 25RF
+# 05 - 100RF
+# 06 - SVM
 
 

@@ -37,7 +37,7 @@ STEP_SIZE = 5
 RUNS = 300
 TEST_SIZE = 0.20
 
-RF_hps = [(1, 100), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (2, 100), (1, 100), (0.0, 0.5),
+RF_hps = [(1, 15), ["squared_error", "absolute_error", "friedman_mse", "poisson"], (2, 100), (1, 100), (0.0, 0.5),
 		  ["sqrt", "log2", None], (2, int(1e8)), (0.0, 1e6), [False, True], (0.0, 1e6)]
 SVM_hps = [(0.0, 1e4), (1e-7, 1e2), (1e-4, 1e5), ["epsilon_insensitive", "squared_epsilon_insensitive"],
 		   [False, True], (1e-4, 1e4), (1, int(1e6))]
@@ -199,8 +199,8 @@ def plot(means, stds, k, label, runs):
 
 
 def HPO(hpo_fn, data, labels, seed):
-	# optimizers = [(RF, RF_hps)]
-	optimizers = [(SVM, SVM_hps)]
+	optimizers = [(RF, RF_hps)]
+	# optimizers = [(SVM, SVM_hps)]
 	# optimizers = [(MLR, MLR_hps), (HR, HR_hps)]
 	for optimizer in optimizers:
 		hpo_inst = HPO_Class(hpo_fn=hpo_fn, opt_fn=optimizer[0], hps=optimizer[1], data=data, labels=labels, seed=seed)
